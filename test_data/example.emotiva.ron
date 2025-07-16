@@ -1,0 +1,39 @@
+(
+    layers: [
+        (
+            name: "base",
+            image: "body.png",
+            offset: (280.0, 280.0),
+            scale: 0.6,
+            z_index: 0,
+        ),
+        (
+            name: "eyes",
+            image: "eyes_open.png",
+            offset: (420.0, 370.0),
+            scale: 0.3,
+            z_index: 1,
+        ),
+        (
+            name: "eyes",
+            image: "eyes_closed.png",
+            offset: (420.0, 370.0),
+            scale: 0.3,
+            z_index: 1,
+        ),
+        (
+            name: "mouth",
+            image: "mouth_open.png",
+            offset: (475.0, 535.0),
+            scale: 0.2,
+            z_index: 2,
+        ),
+        (
+            name: "mouth",
+            image: "mouth_closed.png",
+            offset: (475.0, 535.0),
+            scale: 0.2,
+            z_index: 2,
+        ),
+    ],
+)
