@@ -1,7 +1,8 @@
 //! Emotiva Core - Animation runtime and data structures
 
 pub mod format;
-pub mod mouth;
+mod mouth;
+pub mod quad;
 
 use mouth::MouthState;
 use rand::Rng;
