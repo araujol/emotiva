@@ -27,6 +27,16 @@ pub enum RigLoadError {
     Ron(#[from] ron::error::SpannedError),
 }
 
+/// Describes tween animation for a layer.
+#[derive(Debug, Clone, Deserialize)]
+pub struct Tween {
+    /// Amount of maximum offset movement (x, y)
+    pub sway: (f32, f32),
+
+    /// Duration in seconds for one complete sway loop
+    pub period: f32,
+}
+
 /// A single image layer in a character rig.
 #[derive(Debug, Clone, Deserialize)]
 pub struct CharLayer {
@@ -44,6 +54,9 @@ pub struct CharLayer {
 
     /// Draw order (lower = behind, higher = in front)
     pub z_index: i32,
+
+    /// Optional animation for this layer
+    pub tween: Option<Tween>,
 }
 
 /// A full character rig, consisting of multiple layers.

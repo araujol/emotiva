@@ -8,7 +8,7 @@ async fn main() {
     emotiva.set_base_position(Vec2::new(0.0, 0.0));
 
     loop {
-        clear_background(WHITE);
+        clear_background(GRAY);
 
         let delta = get_frame_time();
         emotiva.update(delta);

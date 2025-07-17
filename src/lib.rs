@@ -15,10 +15,12 @@
 pub mod anim;
 pub mod format;
 pub mod quad;
+pub mod tween;
 
 use anim::eyes::EyesState;
 use anim::mouth::MouthState;
 use format::CharRig;
+use tween::TweenState;
 
 use rand::Rng;
 
@@ -37,15 +39,19 @@ pub struct CharAnimator {
     pub time: f32,
     pub mouth: MouthState,
     pub eyes: EyesState,
+    pub tweens: Vec<TweenState>,
 }
 
 impl CharAnimator {
     pub fn new(rig: CharRig, rng: &mut impl Rng) -> Self {
+        let tweens = rig.layers.iter().map(|_| TweenState::new()).collect();
+
         Self {
             rig,
             time: 0.0,
             mouth: MouthState::new(0.0, rng),
             eyes: EyesState::new(0.0, rng),
+            tweens,
         }
     }
 
@@ -57,12 +63,11 @@ impl CharAnimator {
     }
 
     /// Returns transformed sprites to render this frame.
-    pub fn get_drawables(&self) -> Vec<DrawableSprite> {
+    pub fn get_drawables(&mut self) -> Vec<DrawableSprite> {
         let mut output = Vec::new();
-
         let is_blinking = self.eyes.is_blinking();
 
-        for layer in &self.rig.layers {
+        for (i, layer) in self.rig.layers.iter().enumerate() {
             // Skip eyes_open if blinking
             if is_blinking && layer.name == "eyes" && layer.image.contains("eyes_open") {
                 continue;
@@ -87,12 +92,18 @@ impl CharAnimator {
                 continue;
             }
 
-            // Simple idle animation: sinusoidal Y breathing offset
-            let breathing_offset = (self.time * 2.0).sin() * 2.0; // 2px up/down
+            let mut offset = layer.offset;
+
+            if let Some(tween) = &layer.tween {
+                let tween_state = &mut self.tweens[i];
+                let tween_offset = tween_state.update(1.0 / 60.0, tween); // Assume 60fps tick size
+                offset.0 += tween_offset.dx;
+                offset.1 += tween_offset.dy;
+            }
 
             output.push(DrawableSprite {
                 image: layer.image.clone(),
-                position: (layer.offset.0, layer.offset.1 + breathing_offset),
+                position: offset,
                 scale: layer.scale,
                 z_index: layer.z_index,
             });

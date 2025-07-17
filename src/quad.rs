@@ -60,7 +60,7 @@ impl EmotivaQuad {
         self.animator.update(dt, &mut self.rng);
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&mut self) {
         for sprite in self.animator.get_drawables() {
             if let Some(tex) = self.textures.get(&sprite.image) {
                 let pos_x = sprite.position.0 + self.base_position.x;
