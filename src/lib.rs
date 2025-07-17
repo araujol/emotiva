@@ -1,38 +1,26 @@
 //! Emotiva Core - Animation runtime and data structures
+//!
+//! This library powers expressive 2D character animation for visual novels and games.
+//! It provides a modular system for loading character rigs (.ron format), managing per-layer
+//! motion and expression (e.g. blinking, mouth movement), and outputting drawable sprites
+//! for use in rendering engines like Macroquad.
+//!
+//! Modules:
+//! - `format`: Loader for .ron rig files
+//! - `anim`: Subsystems for procedural body parts behavior
+//! - `quad`: Optional macroquad rendering adapter
+//!
+//! Designed to integrate smoothly with Rusutori and other VN engines.
 
+pub mod anim;
 pub mod format;
-mod mouth;
 pub mod quad;
 
-use mouth::MouthState;
+use anim::eyes::EyesState;
+use anim::mouth::MouthState;
+use format::CharRig;
+
 use rand::Rng;
-use serde::Deserialize;
-
-/// A single image layer in a character rig.
-#[derive(Debug, Clone, Deserialize)]
-pub struct CharLayer {
-    /// Logical name for the part (e.g. "eyes", "mouth", "base")
-    pub name: String,
-
-    /// Image filename or identifier
-    pub image: String,
-
-    /// Position offset (x, y) in pixels
-    pub offset: (f32, f32),
-
-    /// Scale multiplier (1.0 = original size)
-    pub scale: f32,
-
-    /// Draw order (lower = behind, higher = in front)
-    pub z_index: i32,
-}
-
-/// A full character rig, consisting of multiple layers.
-#[derive(Debug, Clone, Deserialize)]
-pub struct CharRig {
-    /// All layers in this character, ordered arbitrarily
-    pub layers: Vec<CharLayer>,
-}
 
 /// The result of a frame update: a layer with absolute transform info.
 #[derive(Debug, Clone)]
@@ -48,6 +36,7 @@ pub struct CharAnimator {
     pub rig: CharRig,
     pub time: f32,
     pub mouth: MouthState,
+    pub eyes: EyesState,
 }
 
 impl CharAnimator {
@@ -56,6 +45,7 @@ impl CharAnimator {
             rig,
             time: 0.0,
             mouth: MouthState::new(0.0, rng),
+            eyes: EyesState::new(0.0, rng),
         }
     }
 
@@ -63,17 +53,14 @@ impl CharAnimator {
     pub fn update(&mut self, delta_time: f32, rng: &mut impl Rng) {
         self.time += delta_time;
         self.mouth.update(self.time, rng);
+        self.eyes.update(self.time, rng);
     }
 
     /// Returns transformed sprites to render this frame.
     pub fn get_drawables(&self) -> Vec<DrawableSprite> {
         let mut output = Vec::new();
 
-        // Natural blink: every 4 seconds, blink lasts 0.15s
-        let blink_interval = 4.0;
-        let blink_duration = 0.15;
-        let blink_phase = self.time % blink_interval;
-        let is_blinking = blink_phase < blink_duration;
+        let is_blinking = self.eyes.is_blinking();
 
         for layer in &self.rig.layers {
             // Skip eyes_open if blinking

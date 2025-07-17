@@ -1,3 +1,18 @@
+//! EmotivaQuad – Macroquad Integration Layer
+//!
+//! This module provides the integration layer between Emotiva's animation core and the Macroquad
+//! rendering backend. It handles loading rig assets (images, layer definitions), managing the
+//! animation loop, and rendering character rigs each frame.
+//!
+//! Features:
+//! - Loads `.emotiva.ron` character rig files
+//! - Applies per-frame animations (e.g. blinking, idle motion)
+//! - Supports positioning characters via base offset (e.g. from VN engine)
+//! - Designed to work independently from game/engine logic (e.g. Rusutori)
+//!
+//! This module is intended for use in applications using Macroquad to display expressive,
+//! layered character animations in visual novels and similar 2D experiences.
+
 use crate::CharAnimator;
 use crate::format::load_rig_from_file;
 

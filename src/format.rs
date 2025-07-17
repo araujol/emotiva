@@ -1,7 +1,17 @@
-//! Emotiva Format - Loader for `.emotiva.ron` rig files
+//! Emotiva Format – Rig File Definition & Loader
+//!
+//! This module defines the serializable data structures (`CharRig`, `CharLayer`) used in `.emotiva.ron` files,
+//! and provides functions to load them from disk.
+//!
+//! Features:
+//! - `CharRig`: Top-level character rig containing ordered layers
+//! - `CharLayer`: Describes an image layer with offset, scale, and z-index
+//! - Rig loading from `.ron` files using Serde and error handling
+//!
+//! This is the bridge between static character definitions and the animation engine.
 
-use crate::CharRig;
 use ron::de::from_reader;
+use serde::Deserialize;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -15,6 +25,32 @@ pub enum RigLoadError {
 
     #[error("Failed to parse RON: {0}")]
     Ron(#[from] ron::error::SpannedError),
+}
+
+/// A single image layer in a character rig.
+#[derive(Debug, Clone, Deserialize)]
+pub struct CharLayer {
+    /// Logical name for the part (e.g. "eyes", "mouth", "base")
+    pub name: String,
+
+    /// Image filename or identifier
+    pub image: String,
+
+    /// Position offset (x, y) in pixels
+    pub offset: (f32, f32),
+
+    /// Scale multiplier (1.0 = original size)
+    pub scale: f32,
+
+    /// Draw order (lower = behind, higher = in front)
+    pub z_index: i32,
+}
+
+/// A full character rig, consisting of multiple layers.
+#[derive(Debug, Clone, Deserialize)]
+pub struct CharRig {
+    /// All layers in this character, ordered arbitrarily
+    pub layers: Vec<CharLayer>,
 }
 
 /// Loads a character rig from a `.ron` file path.
