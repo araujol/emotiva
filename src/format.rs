@@ -12,6 +12,7 @@
 
 use ron::de::from_reader;
 use serde::Deserialize;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -68,6 +69,9 @@ pub struct CharLayer {
 
     /// Optional motion logic for this layer (mouth, blink, etc)
     pub motion: Option<Motion>,
+
+    /// Optional list of alternative image filenames to swap into this layer
+    pub variants: Option<HashMap<String, String>>,
 }
 
 /// A full character rig, consisting of multiple layers.

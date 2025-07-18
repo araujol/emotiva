@@ -23,6 +23,7 @@ use format::{CharRig, Motion};
 use tween::TweenState;
 
 use rand::Rng;
+use std::collections::HashMap;
 
 /// The result of a frame update: a layer with absolute transform info.
 #[derive(Debug, Clone)]
@@ -40,6 +41,8 @@ pub struct CharAnimator {
     pub tweens: Vec<TweenState>,
     pub mouth: Option<MouthState>,
     pub eyes: Option<EyesState>,
+    pub image_overrides: HashMap<String, String>, // layer name -> image override
+    pub image_variants: HashMap<String, HashMap<String, String>>, // layer -> variant_name -> image
 }
 
 impl CharAnimator {
@@ -64,13 +67,49 @@ impl CharAnimator {
             tweens.push(TweenState::new());
         }
 
+        let mut image_variants = HashMap::new();
+
+        for layer in &rig.layers {
+            let mut variant_map = HashMap::new();
+            if let Some(variants) = &layer.variants {
+                for (variant_name, image_name) in variants {
+                    variant_map.insert(variant_name.clone(), image_name.clone());
+                }
+            }
+            image_variants.insert(layer.name.clone(), variant_map);
+        }
+
         Self {
             rig,
             time: 0.0,
             tweens,
             mouth,
             eyes,
+            image_overrides: HashMap::new(),
+            image_variants,
         }
+    }
+
+    /// Change a layer's image by name.
+    pub fn set_layer(&mut self, layer_name: &str, variant: &str) {
+        if let Some(layer_variants) = self.image_variants.get(layer_name) {
+            if let Some(image_name) = layer_variants.get(variant) {
+                self.image_overrides
+                    .insert(layer_name.to_string(), image_name.clone());
+            } else {
+                eprintln!(
+                    "Warning: unknown variant '{}' for layer '{}'",
+                    variant, layer_name
+                );
+            }
+        } else {
+            eprintln!("Warning: layer '{}' has no image variants", layer_name);
+        }
+    }
+
+    /// Reset a layer's image override back to the default.
+    pub fn reset_layer(&mut self, layer_name: &str) {
+        self.image_overrides.remove(layer_name);
     }
 
     /// Advance animation state by delta time (in seconds)
@@ -123,8 +162,14 @@ impl CharAnimator {
                 offset.1 += tween_offset.dy;
             }
 
+            let final_image = self
+                .image_overrides
+                .get(&layer.name)
+                .cloned()
+                .unwrap_or_else(|| layer.image.clone());
+
             output.push(DrawableSprite {
-                image: layer.image.clone(),
+                image: final_image,
                 position: offset,
                 scale: layer.scale,
                 z_index: layer.z_index,

@@ -37,11 +37,27 @@ impl EmotivaQuad {
         let animator = CharAnimator::new(rig, &mut rng);
 
         let mut textures: HashMap<String, Texture2D> = HashMap::new();
+
         for layer in &animator.rig.layers {
-            let tex = load_texture(&format!("{}/{}", texture_base_path, layer.image))
-                .await
-                .unwrap();
-            textures.insert(layer.image.clone(), tex);
+            // Load base image
+            if !textures.contains_key(&layer.image) {
+                let tex = load_texture(&format!("{}/{}", texture_base_path, layer.image))
+                    .await
+                    .unwrap();
+                textures.insert(layer.image.clone(), tex);
+            }
+
+            // Load variant images if present
+            if let Some(variants) = &layer.variants {
+                for image_path in variants.values() {
+                    if !textures.contains_key(image_path) {
+                        let tex = load_texture(&format!("{}/{}", texture_base_path, image_path))
+                            .await
+                            .unwrap();
+                        textures.insert(image_path.clone(), tex);
+                    }
+                }
+            }
         }
 
         EmotivaQuad {
@@ -54,6 +70,14 @@ impl EmotivaQuad {
 
     pub fn set_base_position(&mut self, pos: Vec2) {
         self.base_position = pos;
+    }
+
+    pub fn set_image(&mut self, layer_name: &str, variant: &str) {
+        self.animator.set_layer(layer_name, variant);
+    }
+
+    pub fn reset_image(&mut self, layer_name: &str) {
+        self.animator.reset_layer(layer_name);
     }
 
     pub fn update(&mut self, dt: f32) {
