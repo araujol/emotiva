@@ -19,7 +19,7 @@ pub mod tween;
 
 use anim::eyes::EyesState;
 use anim::mouth::MouthState;
-use format::CharRig;
+use format::{CharRig, Motion};
 use tween::TweenState;
 
 use rand::Rng;
@@ -37,59 +37,81 @@ pub struct DrawableSprite {
 pub struct CharAnimator {
     pub rig: CharRig,
     pub time: f32,
-    pub mouth: MouthState,
-    pub eyes: EyesState,
     pub tweens: Vec<TweenState>,
+    pub mouth: Option<MouthState>,
+    pub eyes: Option<EyesState>,
 }
 
 impl CharAnimator {
     pub fn new(rig: CharRig, rng: &mut impl Rng) -> Self {
-        let tweens = rig.layers.iter().map(|_| TweenState::new()).collect();
+        let mut tweens = Vec::new();
+
+        // Initialize shared animation states (one for all eyes layers, one for all mouth layers)
+        // so that "eyes_open" / "eyes_closed" and similar variants animate in sync.
+        let has_mouth = rig
+            .layers
+            .iter()
+            .any(|l| matches!(l.motion, Some(Motion::Mouth)));
+        let has_eyes = rig
+            .layers
+            .iter()
+            .any(|l| matches!(l.motion, Some(Motion::Blink)));
+
+        let mouth = has_mouth.then(|| MouthState::new(0.0, rng));
+        let eyes = has_eyes.then(|| EyesState::new(0.0, rng));
+
+        for _ in &rig.layers {
+            tweens.push(TweenState::new());
+        }
 
         Self {
             rig,
             time: 0.0,
-            mouth: MouthState::new(0.0, rng),
-            eyes: EyesState::new(0.0, rng),
             tweens,
+            mouth,
+            eyes,
         }
     }
 
     /// Advance animation state by delta time (in seconds)
     pub fn update(&mut self, delta_time: f32, rng: &mut impl Rng) {
         self.time += delta_time;
-        self.mouth.update(self.time, rng);
-        self.eyes.update(self.time, rng);
+
+        if let Some(mouth) = &mut self.mouth {
+            mouth.update(self.time, rng);
+        }
+
+        if let Some(eye) = &mut self.eyes {
+            eye.update(self.time, rng);
+        }
     }
 
     /// Returns transformed sprites to render this frame.
     pub fn get_drawables(&mut self) -> Vec<DrawableSprite> {
         let mut output = Vec::new();
-        let is_blinking = self.eyes.is_blinking();
 
+        // Skip drawing alternate eye/mouth layers that don't match current state.
+        // This works in tandem with the shared EyesState and MouthState.
+        // This avoids rendering both versions at once and keeps everything visually in sync.
         for (i, layer) in self.rig.layers.iter().enumerate() {
-            // Skip eyes_open if blinking
-            if is_blinking && layer.name == "eyes" && layer.image.contains("eyes_open") {
-                continue;
-            }
-            // Skip eyes_closed if not blinking
-            if !is_blinking && layer.name == "eyes" && layer.image.contains("eyes_closed") {
-                continue;
+            if let Some(eye) = &self.eyes {
+                if eye.is_blinking() && layer.image.contains("eyes_open") {
+                    continue;
+                }
+                if !eye.is_blinking() && layer.image.contains("eyes_closed") {
+                    continue;
+                }
             }
 
-            // Skip mouth_closed if mouth is open
-            if self.mouth.is_open(self.time)
-                && layer.name == "mouth"
-                && layer.image.contains("mouth_closed")
-            {
-                continue;
-            }
-            // Skip mouth_open if mouth is closed
-            if !self.mouth.is_open(self.time)
-                && layer.name == "mouth"
-                && layer.image.contains("mouth_open")
-            {
-                continue;
+            if let Some(mouth) = &self.mouth {
+                // Skip mouth_closed if mouth is open
+                if mouth.is_open(self.time) && layer.image.contains("mouth_closed") {
+                    continue;
+                }
+                // Skip mouth_open if mouth is closed
+                if !mouth.is_open(self.time) && layer.image.contains("mouth_open") {
+                    continue;
+                }
             }
 
             let mut offset = layer.offset;

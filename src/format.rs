@@ -37,6 +37,14 @@ pub struct Tween {
     pub period: f32,
 }
 
+/// Type of animation behavior for this layer.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(tag = "kind")]
+pub enum Motion {
+    Blink,
+    Mouth,
+}
+
 /// A single image layer in a character rig.
 #[derive(Debug, Clone, Deserialize)]
 pub struct CharLayer {
@@ -57,6 +65,9 @@ pub struct CharLayer {
 
     /// Optional animation for this layer
     pub tween: Option<Tween>,
+
+    /// Optional motion logic for this layer (mouth, blink, etc)
+    pub motion: Option<Motion>,
 }
 
 /// A full character rig, consisting of multiple layers.
