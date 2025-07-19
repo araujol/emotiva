@@ -17,11 +17,16 @@ pub struct TweenState {
 pub struct TweenOffset {
     pub dx: f32,
     pub dy: f32,
+    pub rotation: f32, // in radians
 }
 
 impl TweenOffset {
     pub fn zero() -> Self {
-        Self { dx: 0.0, dy: 0.0 }
+        Self {
+            dx: 0.0,
+            dy: 0.0,
+            rotation: 0.0,
+        }
     }
 }
 
@@ -37,9 +42,17 @@ impl TweenState {
         let phase = (self.time * 2.0 * PI) / tween.period;
         let sin = phase.sin();
 
-        TweenOffset {
+        let mut offset = TweenOffset {
             dx: tween.sway.0 * sin,
             dy: tween.sway.1 * sin,
+            rotation: 0.0,
+        };
+
+        if let Some(lean) = &tween.lean {
+            let angle_deg = lean.max_angle * sin;
+            offset.rotation = angle_deg.to_radians();
         }
+
+        offset
     }
 }

@@ -87,17 +87,17 @@ impl EmotivaQuad {
     pub fn draw(&mut self) {
         for sprite in self.animator.get_drawables() {
             if let Some(tex) = self.textures.get(&sprite.image) {
-                let pos_x = sprite.position.0 + self.base_position.x;
-                let pos_y = sprite.position.1 + self.base_position.y;
+                let pos = vec2(sprite.position.0, sprite.position.1) + self.base_position;
+                let size = vec2(tex.width() * sprite.scale, tex.height() * sprite.scale);
 
                 let params = DrawTextureParams {
-                    dest_size: Some(Vec2::new(
-                        tex.width() * sprite.scale,
-                        tex.height() * sprite.scale,
-                    )),
+                    dest_size: Some(size),
+                    rotation: sprite.rotation,
+                    pivot: Some(vec2(tex.width() / 2.0, tex.height() / 2.0)),
                     ..Default::default()
                 };
-                draw_texture_ex(tex, pos_x, pos_y, WHITE, params);
+
+                draw_texture_ex(tex, pos.x, pos.y, WHITE, params);
             }
         }
     }

@@ -31,6 +31,7 @@ pub struct DrawableSprite {
     pub image: String,
     pub position: (f32, f32),
     pub scale: f32,
+    pub rotation: f32,
     pub z_index: i32,
 }
 
@@ -154,12 +155,14 @@ impl CharAnimator {
             }
 
             let mut offset = layer.offset;
+            let mut rotation = 0.0;
 
             if let Some(tween) = &layer.tween {
                 let tween_state = &mut self.tweens[i];
                 let tween_offset = tween_state.update(1.0 / 60.0, tween); // Assume 60fps tick size
                 offset.0 += tween_offset.dx;
                 offset.1 += tween_offset.dy;
+                rotation = tween_offset.rotation;
             }
 
             let final_image = self
@@ -172,6 +175,7 @@ impl CharAnimator {
                 image: final_image,
                 position: offset,
                 scale: layer.scale,
+                rotation,
                 z_index: layer.z_index,
             });
         }

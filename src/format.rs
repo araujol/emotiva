@@ -34,8 +34,18 @@ pub struct Tween {
     /// Amount of maximum offset movement (x, y)
     pub sway: (f32, f32),
 
+    /// Optional lean (in degrees)
+    #[serde(default)]
+    pub lean: Option<Lean>,
+
     /// Duration in seconds for one complete sway loop
     pub period: f32,
+}
+
+#[derive(Debug, Clone, Copy, Deserialize)]
+pub struct Lean {
+    /// Maximum rotation in degrees (e.g. 5.0 = tilt ±5°)
+    pub max_angle: f32,
 }
 
 /// Type of animation behavior for this layer.
