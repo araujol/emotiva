@@ -40,12 +40,35 @@ pub struct Tween {
 
     /// Duration in seconds for one complete sway loop
     pub period: f32,
+
+    /// Optional easing curve for start tween motion
+    #[serde(default)]
+    pub easing_start: Option<TweenEasing>,
+
+    /// Optional easing curve for stop tween motion
+    #[serde(default)]
+    pub easing_stop: Option<TweenEasing>,
 }
 
 #[derive(Debug, Clone, Copy, Deserialize)]
 pub struct Lean {
     /// Maximum rotation in degrees (e.g. 5.0 = tilt ±5°)
     pub max_angle: f32,
+}
+
+/// Supported easing curve options for tweens.
+#[derive(Debug, Clone, Copy, Deserialize)]
+pub enum TweenEasing {
+    Linear,
+    SineIn,
+    SineOut,
+    SineInOut,
+    QuadIn,
+    QuadOut,
+    QuadInOut,
+    CubicIn,
+    CubicOut,
+    CubicInOut,
 }
 
 /// A single image layer in a character rig.

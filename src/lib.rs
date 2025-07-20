@@ -13,6 +13,7 @@
 //! Designed to integrate smoothly with Rusutori and other VN engines.
 
 pub mod anim;
+pub mod easing;
 pub mod format;
 pub mod quad;
 pub mod tween;
@@ -208,12 +209,28 @@ impl CharAnimator {
             }
             (_, "tween_start") => {
                 if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-                    self.tweens[index].enabled = true;
+                    self.tweens[index].start();
                 }
             }
             (_, "tween_stop") => {
                 if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-                    self.tweens[index].enabled = false;
+                    self.tweens[index].stop();
+                }
+            }
+            (_, "tween_start_easing") => {
+                if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
+                    let tween_def = &self.rig.layers[index].tween;
+                    if let Some(tween) = tween_def {
+                        self.tweens[index].start_easing(tween);
+                    }
+                }
+            }
+            (_, "tween_stop_easing") => {
+                if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
+                    let tween_def = &self.rig.layers[index].tween;
+                    if let Some(tween) = tween_def {
+                        self.tweens[index].stop_easing(tween);
+                    }
                 }
             }
             _ => {
