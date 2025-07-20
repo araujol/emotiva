@@ -7,9 +7,19 @@ use crate::format::Tween;
 use std::f32::consts::PI;
 
 /// Represents the animated state of a tweened layer at runtime.
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct TweenState {
     pub time: f32,
+    pub enabled: bool,
+}
+
+impl Default for TweenState {
+    fn default() -> Self {
+        Self {
+            time: 0.0,
+            enabled: false,
+        }
+    }
 }
 
 /// The current per-frame animated offset for a layer.
@@ -32,11 +42,15 @@ impl TweenOffset {
 
 impl TweenState {
     pub fn new() -> Self {
-        Self { time: 0.0 }
+        Self::default()
     }
 
     /// Advance time and compute the current offset for a given sway definition.
     pub fn update(&mut self, dt: f32, tween: &Tween) -> TweenOffset {
+        if !self.enabled {
+            return TweenOffset::zero();
+        }
+
         self.time += dt;
 
         let phase = (self.time * 2.0 * PI) / tween.period;

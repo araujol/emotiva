@@ -12,6 +12,7 @@ pub struct EyesState {
     next_blink_time: f32,
     blink_duration: f32,
     blinking: bool,
+    blinking_enabled: bool,
 }
 
 impl EyesState {
@@ -22,10 +23,15 @@ impl EyesState {
             next_blink_time: next,
             blink_duration: 0.12, // Change this value to modify how long a blink lasts
             blinking: false,
+            blinking_enabled: false,
         }
     }
 
     pub fn update(&mut self, time: f32, rng: &mut impl Rng) {
+        if !self.blinking_enabled {
+            return;
+        }
+
         if self.blinking {
             if time >= self.next_blink_time + self.blink_duration {
                 self.blinking = false;
@@ -40,5 +46,14 @@ impl EyesState {
 
     pub fn is_blinking(&self) -> bool {
         self.blinking
+    }
+
+    pub fn start(&mut self) {
+        self.blinking_enabled = true;
+    }
+
+    pub fn stop(&mut self) {
+        self.blinking_enabled = false;
+        self.blinking = false; // ensure eyes are OPEN
     }
 }

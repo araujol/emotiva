@@ -101,4 +101,8 @@ impl EmotivaQuad {
             }
         }
     }
+
+    pub fn trigger(&mut self, layer: &str, action: &str) {
+        self.animator.trigger(layer, action);
+    }
 }

@@ -2,35 +2,48 @@
     layers: [
         (
             name: "base",
-            image: "body.png",
+            image: "chibi_body.png",
             offset: (180.0, 180.0),
             scale: 0.6,
             z_index: 0,
+            tween: Some((
+                sway: (0.0, 1.5),
+                lean: Some((max_angle: 0.0)),
+                period: 2.5,
+            )),
         ),
         (
             name: "eyes",
-            image: "eyes_open.png",
+            image: "chibi_eyes_open.png",
             offset: (325.0, 280.0),
             scale: 0.3,
             z_index: 1,
+            tween: Some((
+                sway: (1.2, 0.0),
+                period: 2.0,
+            )),
         ),
         (
             name: "eyes",
-            image: "eyes_closed.png",
+            image: "chibi_eyes_closed.png",
             offset: (325.0, 280.0),
             scale: 0.3,
             z_index: 1,
         ),
         (
             name: "mouth",
-            image: "mouth_open.png",
+            image: "chibi_mouth_open.png",
             offset: (380.0, 435.0),
             scale: 0.2,
             z_index: 2,
+            tween: Some((
+                sway: (1.0, 0.0),
+                period: 0.5,
+            )),
         ),
         (
             name: "mouth",
-            image: "mouth_closed.png",
+            image: "chibi_mouth_closed.png",
             offset: (380.0, 435.0),
             scale: 0.2,
             z_index: 2,

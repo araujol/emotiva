@@ -22,7 +22,6 @@
                 sway: (0.3, 0.0),
                 period: 2.5,
             )),
-            motion: Some((kind: "Blink")),
         ),
         (
             name: "eyes",
@@ -34,7 +33,6 @@
                 sway: (0.3, 0.0),
                 period: 2.5,
             )),
-            motion: Some((kind: "Blink")),
         ),
         (
             name: "mouth",
@@ -46,7 +44,6 @@
                 sway: (1.0, 0.0),
                 period: 0.5,
             )),
-            motion: Some((kind: "Mouth")),
         ),
     ],
 )

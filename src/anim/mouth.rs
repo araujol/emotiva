@@ -10,32 +10,36 @@ use rand::Rng;
 
 #[derive(Debug)]
 pub struct MouthState {
-    pub is_talking: bool,
-    pub next_phase_time: f32,
+    is_talking: bool,
+    next_phase_time: f32,
+    idle_talking: bool,
 }
 
 impl MouthState {
     pub fn new(initial_time: f32, rng: &mut impl Rng) -> Self {
-        let talking = false;
         // Change the initial silence duration range here
         let duration = rng.random_range(2.0..=5.0); // initial silence duration
         Self {
-            is_talking: talking,
+            is_talking: false,
             next_phase_time: initial_time + duration,
+            idle_talking: false,
         }
     }
 
     pub fn update(&mut self, time: f32, rng: &mut impl Rng) {
-        if time >= self.next_phase_time {
-            self.is_talking = !self.is_talking;
-            let duration = if self.is_talking {
-                // Change the talking duration range here
-                rng.random_range(0.5..=2.0) // talking duration
-            } else {
-                // Change the silence duration range here
-                rng.random_range(2.0..=5.0) // silence duration
-            };
-            self.next_phase_time = time + duration;
+        // This only affects the idle talk option.
+        if self.idle_talking {
+            if time >= self.next_phase_time {
+                self.is_talking = !self.is_talking;
+                let duration = if self.is_talking {
+                    // Change the talking duration range here
+                    rng.random_range(0.5..=2.0) // talking duration
+                } else {
+                    // Change the silence duration range here
+                    rng.random_range(2.0..=5.0) // silence duration
+                };
+                self.next_phase_time = time + duration;
+            }
         }
     }
 
@@ -47,5 +51,19 @@ impl MouthState {
         } else {
             false
         }
+    }
+
+    pub fn start(&mut self) {
+        self.is_talking = true;
+    }
+
+    pub fn stop(&mut self) {
+        self.is_talking = false;
+        self.idle_talking = false;
+    }
+
+    pub fn idle_chat(&mut self) {
+        self.is_talking = true;
+        self.idle_talking = true;
     }
 }

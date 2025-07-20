@@ -19,7 +19,7 @@ pub mod tween;
 
 use anim::eyes::EyesState;
 use anim::mouth::MouthState;
-use format::{CharRig, Motion};
+use format::CharRig;
 use tween::TweenState;
 
 use rand::Rng;
@@ -52,14 +52,8 @@ impl CharAnimator {
 
         // Initialize shared animation states (one for all eyes layers, one for all mouth layers)
         // so that "eyes_open" / "eyes_closed" and similar variants animate in sync.
-        let has_mouth = rig
-            .layers
-            .iter()
-            .any(|l| matches!(l.motion, Some(Motion::Mouth)));
-        let has_eyes = rig
-            .layers
-            .iter()
-            .any(|l| matches!(l.motion, Some(Motion::Blink)));
+        let has_mouth = rig.layers.iter().any(|l| l.name.contains("mouth"));
+        let has_eyes = rig.layers.iter().any(|l| l.name.contains("eyes"));
 
         let mouth = has_mouth.then(|| MouthState::new(0.0, rng));
         let eyes = has_eyes.then(|| EyesState::new(0.0, rng));
@@ -183,5 +177,48 @@ impl CharAnimator {
         // Sort by z_index before drawing
         output.sort_by_key(|s| s.z_index);
         output
+    }
+
+    pub fn trigger(&mut self, layer: &str, action: &str) {
+        match (layer, action) {
+            ("eyes", "start_blinking") => {
+                if let Some(eyes) = &mut self.eyes {
+                    eyes.start();
+                }
+            }
+            ("eyes", "stop_blinking") => {
+                if let Some(eyes) = &mut self.eyes {
+                    eyes.stop();
+                }
+            }
+            ("mouth", "start_talking") => {
+                if let Some(mouth) = &mut self.mouth {
+                    mouth.start();
+                }
+            }
+            ("mouth", "stop_talking") => {
+                if let Some(mouth) = &mut self.mouth {
+                    mouth.stop();
+                }
+            }
+            ("mouth", "idle_chat") => {
+                if let Some(mouth) = &mut self.mouth {
+                    mouth.idle_chat();
+                }
+            }
+            (_, "tween_start") => {
+                if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
+                    self.tweens[index].enabled = true;
+                }
+            }
+            (_, "tween_stop") => {
+                if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
+                    self.tweens[index].enabled = false;
+                }
+            }
+            _ => {
+                eprintln!("Unknown trigger: {}/{}", layer, action);
+            }
+        }
     }
 }

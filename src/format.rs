@@ -48,14 +48,6 @@ pub struct Lean {
     pub max_angle: f32,
 }
 
-/// Type of animation behavior for this layer.
-#[derive(Debug, Clone, Deserialize)]
-#[serde(tag = "kind")]
-pub enum Motion {
-    Blink,
-    Mouth,
-}
-
 /// A single image layer in a character rig.
 #[derive(Debug, Clone, Deserialize)]
 pub struct CharLayer {
@@ -76,9 +68,6 @@ pub struct CharLayer {
 
     /// Optional animation for this layer
     pub tween: Option<Tween>,
-
-    /// Optional motion logic for this layer (mouth, blink, etc)
-    pub motion: Option<Motion>,
 
     /// Optional list of alternative image filenames to swap into this layer
     pub variants: Option<HashMap<String, String>>,
