@@ -3,8 +3,8 @@
 //! This module provides basic runtime tweening (sway/bobbing) for character layers
 //! based on the data defined in the `Tween` struct from the `format` module.
 
-use crate::easing;
-use crate::format::{Tween, TweenEasing};
+use crate::easing::{Easing, resolve};
+use crate::format::Tween;
 
 /// Represents the animated state of a tweened layer at runtime.
 #[derive(Debug, Clone, Copy)]
@@ -111,18 +111,7 @@ impl TweenState {
                 self.ease_in_state = None;
                 self.enabled = true;
             }
-            let t_eased = match tween.easing_start.unwrap_or(TweenEasing::CubicOut) {
-                TweenEasing::Linear => easing::linear(t),
-                TweenEasing::CubicOut => easing::cubic_out(t),
-                TweenEasing::CubicIn => easing::cubic_in(t),
-                TweenEasing::CubicInOut => easing::cubic_in_out(t),
-                TweenEasing::SineIn => easing::sine_in(t),
-                TweenEasing::SineOut => easing::sine_out(t),
-                TweenEasing::SineInOut => easing::sine_in_out(t),
-                TweenEasing::QuadIn => easing::quad_in(t),
-                TweenEasing::QuadOut => easing::quad_out(t),
-                TweenEasing::QuadInOut => easing::quad_in_out(t),
-            };
+            let t_eased = resolve(tween.easing_start.unwrap_or(Easing::SineIn), t);
             TweenOffset::zero().lerp(start_target, t_eased)
         } else if self.enabled {
             self.time += dt;
@@ -134,18 +123,7 @@ impl TweenState {
             if t >= 1.0 {
                 self.ease_out_state = None;
             }
-            let t_eased = match tween.easing_stop.unwrap_or(TweenEasing::CubicOut) {
-                TweenEasing::Linear => easing::linear(t),
-                TweenEasing::CubicOut => easing::cubic_out(t),
-                TweenEasing::CubicIn => easing::cubic_in(t),
-                TweenEasing::CubicInOut => easing::cubic_in_out(t),
-                TweenEasing::SineIn => easing::sine_in(t),
-                TweenEasing::SineOut => easing::sine_out(t),
-                TweenEasing::SineInOut => easing::sine_in_out(t),
-                TweenEasing::QuadIn => easing::quad_in(t),
-                TweenEasing::QuadOut => easing::quad_out(t),
-                TweenEasing::QuadInOut => easing::quad_in_out(t),
-            };
+            let t_eased = resolve(tween.easing_stop.unwrap_or(Easing::SineOut), t);
             start_offset.lerp(TweenOffset::zero(), t_eased)
         } else {
             TweenOffset::zero()

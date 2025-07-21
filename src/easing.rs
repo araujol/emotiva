@@ -14,7 +14,38 @@
 //! These functions are pure and stateless, making them ideal for use in
 //! animation engines, game loops, or real-time visual applications.
 
+use serde::Deserialize;
 use std::f32::consts::{FRAC_PI_2, PI};
+
+/// Supported easing curve.
+#[derive(Debug, Clone, Copy, Deserialize)]
+pub enum Easing {
+    Linear,
+    SineIn,
+    SineOut,
+    SineInOut,
+    QuadIn,
+    QuadOut,
+    QuadInOut,
+    CubicIn,
+    CubicOut,
+    CubicInOut,
+}
+
+pub fn resolve(easing: Easing, t: f32) -> f32 {
+    match easing {
+        Easing::Linear => linear(t),
+        Easing::SineIn => sine_in(t),
+        Easing::SineOut => sine_out(t),
+        Easing::SineInOut => sine_in_out(t),
+        Easing::QuadIn => quad_in(t),
+        Easing::QuadOut => quad_out(t),
+        Easing::QuadInOut => quad_in_out(t),
+        Easing::CubicIn => cubic_in(t),
+        Easing::CubicOut => cubic_out(t),
+        Easing::CubicInOut => cubic_in_out(t),
+    }
+}
 
 /// The most honest easing function. Just goes from A to B without playing with your heart.
 /// Produces constant speed with no acceleration or deceleration.
