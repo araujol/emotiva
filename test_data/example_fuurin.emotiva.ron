@@ -3,7 +3,7 @@
         (
             name: "base",
             image: "fuurin.png",
-            offset: (180.0, 180.0),
+            offset: (430.0, 560.0),
             scale: 0.6,
             z_index: 0,
             tween: Some((

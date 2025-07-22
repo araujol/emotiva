@@ -3,7 +3,7 @@
         (
             name: "base",
             image: "body.png",
-            offset: (180.0, 180.0),
+            offset: (430.0, 565.0),
             scale: 0.7,
             z_index: 0,
             tween: Some((
@@ -36,7 +36,7 @@
         (
             name: "eyes",
             image: "eyes_closed.png",
-            offset: (410.0, 300.0),
+            offset: (410.0, 230.0),
             scale: 0.2,
             z_index: 1,
             tween: Some((
@@ -52,7 +52,7 @@
         (
             name: "mouth",
             image: "mouth_open.png",
-            offset: (375.0, 310.0),
+            offset: (410.0, 300.0),
             scale: 0.27,
             z_index: 1,
             tween: Some((

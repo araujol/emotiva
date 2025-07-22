@@ -15,6 +15,7 @@
 pub mod anim;
 pub mod easing;
 pub mod format;
+pub mod fx;
 pub mod motion;
 pub mod quad;
 pub mod tween;
@@ -22,11 +23,14 @@ pub mod tween;
 use anim::eyes::EyesState;
 use anim::mouth::MouthState;
 use format::CharRig;
+use fx::VisualFxState;
 use motion::Motion2D;
 use tween::TweenState;
 
 use rand::Rng;
 use std::collections::HashMap;
+
+use crate::easing::Easing;
 
 /// The result of a frame update: a layer with absolute transform info.
 #[derive(Debug, Clone)]
@@ -36,6 +40,7 @@ pub struct DrawableSprite {
     pub scale: f32,
     pub rotation: f32,
     pub z_index: i32,
+    pub alpha: f32,
 }
 
 /// The character animator holds time state and generates drawables.
@@ -48,12 +53,14 @@ pub struct CharAnimator {
     pub image_overrides: HashMap<String, String>, // layer name -> image override
     pub image_variants: HashMap<String, HashMap<String, String>>, // layer -> variant_name -> image
     pub motions: HashMap<String, Motion2D>,       // layer name -> motion animation
+    pub visual_fx: VisualFxState,
 }
 
 impl CharAnimator {
     pub fn new(rig: CharRig, rng: &mut impl Rng) -> Self {
         let mut tweens = Vec::new();
         let mut motions = HashMap::new();
+        let mut visual_fx = VisualFxState::new();
 
         let has_mouth = rig.layers.iter().any(|l| l.name.contains("mouth"));
         let has_eyes = rig.layers.iter().any(|l| l.name.contains("eyes"));
@@ -75,6 +82,9 @@ impl CharAnimator {
                     ),
                 );
             }
+
+            // Store base scale per layer for visual fx
+            visual_fx.base_scale.insert(layer.name.clone(), layer.scale);
         }
 
         let mut image_variants = HashMap::new();
@@ -91,13 +101,14 @@ impl CharAnimator {
 
         Self {
             rig,
-            time: 0.0,
             tweens,
             mouth,
             eyes,
-            image_overrides: HashMap::new(),
             image_variants,
             motions,
+            visual_fx,
+            time: 0.0,
+            image_overrides: HashMap::new(),
         }
     }
 
@@ -138,6 +149,8 @@ impl CharAnimator {
         for motion in self.motions.values_mut() {
             motion.update(delta_time);
         }
+
+        self.visual_fx.update(delta_time);
     }
 
     /// Returns transformed sprites to render this frame.
@@ -167,11 +180,11 @@ impl CharAnimator {
                     continue;
                 }
             }
-            // ================================================================================
-            // Apply effects from different systems
-            // ================================================================================
+
             let mut offset = layer.offset;
             let mut rotation = 0.0;
+            let mut scale = layer.scale;
+            let mut alpha = 1.0;
 
             // Apply tween effect
             if let Some(tween) = &layer.tween {
@@ -189,7 +202,15 @@ impl CharAnimator {
                 offset.1 += dy;
             }
 
-            // Resolve layer image
+            if let Some(fx_offset) = self.visual_fx.get_fx(&layer.name) {
+                if let Some(s) = fx_offset.scale {
+                    scale *= s;
+                }
+                if let Some(a) = fx_offset.alpha {
+                    alpha *= a;
+                }
+            }
+
             let final_image = self
                 .image_overrides
                 .get(&layer.name)
@@ -199,9 +220,10 @@ impl CharAnimator {
             output.push(DrawableSprite {
                 image: final_image,
                 position: offset,
-                scale: layer.scale,
+                scale,
                 rotation,
                 z_index: layer.z_index,
+                alpha,
             });
         }
 
@@ -293,5 +315,29 @@ impl CharAnimator {
         } else {
             false
         }
+    }
+
+    // FX API functions
+    pub fn set_scale(&mut self, layer: &str, from: f32, to: f32, duration: f32, easing: Easing) {
+        self.visual_fx
+            .add_scale_fx(layer, crate::fx::make_scale_fx(from, to, duration, easing));
+    }
+
+    pub fn remove_scale(&mut self, layer: &str) {
+        self.visual_fx.remove_scale_fx(layer);
+    }
+
+    pub fn set_alpha(&mut self, layer: &str, from: f32, to: f32, duration: f32, easing: Easing) {
+        self.visual_fx
+            .add_alpha_fx(layer, crate::fx::make_alpha_fx(from, to, duration, easing));
+    }
+
+    pub fn remove_alpha(&mut self, layer: &str) {
+        self.visual_fx.remove_alpha_fx(layer);
+    }
+
+    // Clear all FX
+    pub fn clear_all_fx(&mut self) {
+        self.visual_fx.clear_all_fx();
     }
 }

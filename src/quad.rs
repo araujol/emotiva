@@ -14,6 +14,7 @@
 //! layered character animations in visual novels and similar 2D experiences.
 
 use crate::CharAnimator;
+use crate::easing::Easing;
 use crate::format::load_rig_from_file;
 
 // Use crate rand from root to avoid Macroquad's re-export conflict
@@ -68,6 +69,42 @@ impl EmotivaQuad {
         }
     }
 
+    pub fn update(&mut self, dt: f32) {
+        self.animator.update(dt, &mut self.rng);
+    }
+
+    pub fn draw(&mut self) {
+        for sprite in self.animator.get_drawables() {
+            if let Some(tex) = self.textures.get(&sprite.image) {
+                // Adjust position so scaling/rotation happen around the sprite's center.
+                // Subtracting the scaled pivot ensures correct alignment at the intended position.
+                let pivot = vec2(tex.width() / 2.0, tex.height() / 2.0);
+                let pos = vec2(sprite.position.0, sprite.position.1) + self.base_position
+                    - pivot * sprite.scale;
+
+                let size = vec2(tex.width(), tex.height()) * sprite.scale;
+
+                let params = DrawTextureParams {
+                    dest_size: Some(size),
+                    rotation: sprite.rotation,
+                    pivot: Some(pivot),
+                    ..Default::default()
+                };
+
+                draw_texture_ex(
+                    tex,
+                    pos.x,
+                    pos.y,
+                    Color::new(1.0, 1.0, 1.0, sprite.alpha),
+                    params,
+                );
+            }
+        }
+    }
+
+    /* ============================
+    | API Methods start from here |
+    ============================ */
     pub fn set_base_position(&mut self, pos: Vec2) {
         self.base_position = pos;
     }
@@ -80,28 +117,6 @@ impl EmotivaQuad {
         self.animator.reset_layer(layer_name);
     }
 
-    pub fn update(&mut self, dt: f32) {
-        self.animator.update(dt, &mut self.rng);
-    }
-
-    pub fn draw(&mut self) {
-        for sprite in self.animator.get_drawables() {
-            if let Some(tex) = self.textures.get(&sprite.image) {
-                let pos = vec2(sprite.position.0, sprite.position.1) + self.base_position;
-                let size = vec2(tex.width() * sprite.scale, tex.height() * sprite.scale);
-
-                let params = DrawTextureParams {
-                    dest_size: Some(size),
-                    rotation: sprite.rotation,
-                    pivot: Some(vec2(tex.width() / 2.0, tex.height() / 2.0)),
-                    ..Default::default()
-                };
-
-                draw_texture_ex(tex, pos.x, pos.y, WHITE, params);
-            }
-        }
-    }
-
     pub fn trigger(&mut self, layer: &str, action: &str) {
         self.animator.trigger(layer, action);
     }
@@ -112,5 +127,26 @@ impl EmotivaQuad {
 
     pub fn is_motion_finished(&mut self, layer: &str) -> bool {
         return self.animator.is_motion_finished(layer);
+    }
+
+    //=============== FX API ===============//
+    pub fn set_scale(&mut self, layer: &str, min: f32, max: f32, speed: f32, easing: Easing) {
+        self.animator.set_scale(layer, min, max, speed, easing);
+    }
+
+    pub fn remove_scale(&mut self, layer: &str) {
+        self.animator.remove_scale(layer);
+    }
+
+    pub fn set_alpha(&mut self, layer: &str, from: f32, to: f32, speed: f32, easing: Easing) {
+        self.animator.set_alpha(layer, from, to, speed, easing);
+    }
+
+    pub fn remove_alpha(&mut self, layer: &str) {
+        self.animator.remove_alpha(layer);
+    }
+
+    pub fn clear_all_fx(&mut self) {
+        self.animator.clear_all_fx();
     }
 }
