@@ -1,9 +1,9 @@
 //! Emotiva Motion – Offset Animation Runtime Logic
 //!
-//! This module handles simple offset animations for character layers,
+//! This module handles simple offset and rotation animations for character layers,
 //! using the `Motion` struct from the `format` module. It enables
-//! linear or eased transitions between two positions over time,
-//! such as smooth movement or pose shifts during scene transitions.
+//! linear or eased transitions between two positions or angles over time,
+//! such as smooth movement, pose shifts, or rotation transitions during scene changes.
 
 use crate::easing::{Easing, resolve};
 
@@ -80,5 +80,38 @@ impl Motion2D {
 
     pub fn is_finished(&self) -> bool {
         !self.playing
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Rotation {
+    motion: Motion2D,
+}
+
+impl Rotation {
+    pub fn new(degrees: f32, duration: f32, easing: Easing) -> Self {
+        Self {
+            motion: Motion2D::new((0.0, 0.0), (degrees.to_radians(), 0.0), duration, easing),
+        }
+    }
+
+    pub fn update(&mut self, dt: f32) {
+        self.motion.update(dt);
+    }
+
+    pub fn play(&mut self) {
+        self.motion.play();
+    }
+
+    pub fn reverse(&mut self) {
+        self.motion.reverse();
+    }
+
+    pub fn value(&self) -> f32 {
+        self.motion.value().0
+    }
+
+    pub fn is_finished(&self) -> bool {
+        self.motion.is_finished()
     }
 }

@@ -93,6 +93,8 @@ pub struct MotionDef {
     pub duration: f32,
     #[serde(default)]
     pub easing: Option<Easing>,
+    #[serde(default)]
+    pub rotation: Option<f32>,
 }
 
 /// A full character rig, consisting of multiple layers.

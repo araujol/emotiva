@@ -24,7 +24,7 @@ use anim::eyes::EyesState;
 use anim::mouth::MouthState;
 use format::CharRig;
 use fx::VisualFxState;
-use motion::Motion2D;
+use motion::{Motion2D, Rotation};
 use tween::TweenState;
 
 use rand::Rng;
@@ -53,6 +53,7 @@ pub struct CharAnimator {
     pub image_overrides: HashMap<String, String>, // layer name -> image override
     pub image_variants: HashMap<String, HashMap<String, String>>, // layer -> variant_name -> image
     pub motions: HashMap<String, Motion2D>,       // layer name -> motion animation
+    pub rotations: HashMap<String, Rotation>,
     pub visual_fx: VisualFxState,
 }
 
@@ -60,6 +61,7 @@ impl CharAnimator {
     pub fn new(rig: CharRig, rng: &mut impl Rng) -> Self {
         let mut tweens = Vec::new();
         let mut motions = HashMap::new();
+        let mut rotations = HashMap::new();
         let mut visual_fx = VisualFxState::new();
 
         let has_mouth = rig.layers.iter().any(|l| l.name.contains("mouth"));
@@ -78,9 +80,16 @@ impl CharAnimator {
                         (0.0, 0.0),
                         def.target,
                         def.duration,
-                        def.easing.unwrap_or(crate::easing::Easing::Linear),
+                        def.easing.unwrap_or(Easing::Linear),
                     ),
                 );
+
+                if let Some(deg) = def.rotation {
+                    rotations.insert(
+                        layer.name.clone(),
+                        Rotation::new(deg, def.duration, def.easing.unwrap_or(Easing::Linear)),
+                    );
+                }
             }
 
             // Store base scale per layer for visual fx
@@ -106,6 +115,7 @@ impl CharAnimator {
             eyes,
             image_variants,
             motions,
+            rotations,
             visual_fx,
             time: 0.0,
             image_overrides: HashMap::new(),
@@ -148,6 +158,10 @@ impl CharAnimator {
 
         for motion in self.motions.values_mut() {
             motion.update(delta_time);
+        }
+
+        for rotation in self.rotations.values_mut() {
+            rotation.update(delta_time);
         }
 
         self.visual_fx.update(delta_time);
@@ -200,6 +214,10 @@ impl CharAnimator {
                 let (dx, dy) = motion.value();
                 offset.0 += dx;
                 offset.1 += dy;
+            }
+
+            if let Some(rot) = self.rotations.get(&layer.name) {
+                rotation += rot.value();
             }
 
             if let Some(fx_offset) = self.visual_fx.get_fx(&layer.name) {
@@ -263,10 +281,16 @@ impl CharAnimator {
                 if let Some(motion) = self.motions.get_mut(layer) {
                     motion.play();
                 }
+                if let Some(rotation) = self.rotations.get_mut(layer) {
+                    rotation.play();
+                }
             }
             (_, "motion_reverse") => {
                 if let Some(motion) = self.motions.get_mut(layer) {
                     motion.reverse();
+                }
+                if let Some(rotation) = self.rotations.get_mut(layer) {
+                    rotation.reverse();
                 }
             }
             (_, "tween_start") => {
@@ -281,16 +305,14 @@ impl CharAnimator {
             }
             (_, "tween_start_easing") => {
                 if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-                    let tween_def = &self.rig.layers[index].tween;
-                    if let Some(tween) = tween_def {
+                    if let Some(tween) = &self.rig.layers[index].tween {
                         self.tweens[index].start_easing(tween);
                     }
                 }
             }
             (_, "tween_stop_easing") => {
                 if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-                    let tween_def = &self.rig.layers[index].tween;
-                    if let Some(tween) = tween_def {
+                    if let Some(tween) = &self.rig.layers[index].tween {
                         self.tweens[index].stop_easing(tween);
                     }
                 }
@@ -302,11 +324,17 @@ impl CharAnimator {
     }
 
     pub fn is_motion_finished(&mut self, layer: &str) -> bool {
-        if let Some(motion) = self.motions.get_mut(layer) {
-            motion.is_finished()
-        } else {
-            false
-        }
+        let motion_done = self
+            .motions
+            .get_mut(layer)
+            .map(|m| m.is_finished())
+            .unwrap_or(true);
+        let rotation_done = self
+            .rotations
+            .get_mut(layer)
+            .map(|r| r.is_finished())
+            .unwrap_or(true);
+        motion_done && rotation_done
     }
 
     pub fn is_tween_enabled(&mut self, layer: &str) -> bool {
