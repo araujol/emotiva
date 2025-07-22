@@ -2,6 +2,18 @@ use emotiva::quad::EmotivaQuad;
 
 use macroquad::prelude::*;
 
+fn move_char(emotiva: &mut EmotivaQuad) {
+    emotiva.trigger("base", "motion_play");
+    emotiva.trigger("eyes", "motion_play");
+    emotiva.trigger("mouth", "motion_play");
+}
+
+fn reverse_char(emotiva: &mut EmotivaQuad) {
+    emotiva.trigger("base", "motion_reverse");
+    emotiva.trigger("eyes", "motion_reverse");
+    emotiva.trigger("mouth", "motion_reverse");
+}
+
 #[macroquad::main("Emotiva Viewer")]
 async fn main() {
     let mut emotiva = EmotivaQuad::load("test_data/example.emotiva.ron", "test_data").await;
@@ -24,6 +36,7 @@ async fn main() {
                 emotiva.trigger("mouth", "start_talking");
                 emotiva.trigger("mouth", "tween_start");
                 emotiva.trigger("base", "tween_start");
+                move_char(&mut emotiva);
                 //emotiva.trigger("mouth", "idle_chat");
                 //emotiva.set_image("base", "hello");
             } else {
@@ -32,8 +45,10 @@ async fn main() {
                 emotiva.trigger("eyes", "tween_stop");
                 emotiva.trigger("mouth", "stop_talking");
                 emotiva.trigger("base", "tween_stop");
+                reverse_char(&mut emotiva);
                 //emotiva.reset_image("base");
             }
+
             toggled = !toggled;
             elapsed = 0.0;
         }

@@ -105,4 +105,12 @@ impl EmotivaQuad {
     pub fn trigger(&mut self, layer: &str, action: &str) {
         self.animator.trigger(layer, action);
     }
+
+    pub fn is_tween_enabled(&mut self, layer: &str) -> bool {
+        return self.animator.is_tween_enabled(layer);
+    }
+
+    pub fn is_motion_finished(&mut self, layer: &str) -> bool {
+        return self.animator.is_motion_finished(layer);
+    }
 }

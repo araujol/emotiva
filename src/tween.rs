@@ -1,7 +1,8 @@
-//! Emotiva Tween – Layer Motion Runtime Logic
+//! Emotiva Tween – Layer Sway & Idle Animation Runtime
 //!
-//! This module provides basic runtime tweening (sway/bobbing) for character layers
-//! based on the data defined in the `Tween` struct from the `format` module.
+//! This module provides ambient tweening effects (like sway, bob, or lean)
+//! for character layers, based on the `Tween` data defined in the `format` module.
+//! These animations loop continuously and add natural motion to static images.
 
 use crate::easing::{Easing, resolve};
 use crate::format::Tween;
@@ -66,6 +67,10 @@ impl TweenState {
 
     pub fn stop(&mut self) {
         self.enabled = false;
+    }
+
+    pub fn is_enabled(&mut self) -> bool {
+        return self.enabled;
     }
 
     /// Start animation with easing in.

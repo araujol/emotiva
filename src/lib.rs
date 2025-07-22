@@ -15,12 +15,14 @@
 pub mod anim;
 pub mod easing;
 pub mod format;
+pub mod motion;
 pub mod quad;
 pub mod tween;
 
 use anim::eyes::EyesState;
 use anim::mouth::MouthState;
 use format::CharRig;
+use motion::Motion2D;
 use tween::TweenState;
 
 use rand::Rng;
@@ -45,22 +47,34 @@ pub struct CharAnimator {
     pub eyes: Option<EyesState>,
     pub image_overrides: HashMap<String, String>, // layer name -> image override
     pub image_variants: HashMap<String, HashMap<String, String>>, // layer -> variant_name -> image
+    pub motions: HashMap<String, Motion2D>,       // layer name -> motion animation
 }
 
 impl CharAnimator {
     pub fn new(rig: CharRig, rng: &mut impl Rng) -> Self {
         let mut tweens = Vec::new();
+        let mut motions = HashMap::new();
 
-        // Initialize shared animation states (one for all eyes layers, one for all mouth layers)
-        // so that "eyes_open" / "eyes_closed" and similar variants animate in sync.
         let has_mouth = rig.layers.iter().any(|l| l.name.contains("mouth"));
         let has_eyes = rig.layers.iter().any(|l| l.name.contains("eyes"));
 
         let mouth = has_mouth.then(|| MouthState::new(0.0, rng));
         let eyes = has_eyes.then(|| EyesState::new(0.0, rng));
 
-        for _ in &rig.layers {
+        for (_i, layer) in rig.layers.iter().enumerate() {
             tweens.push(TweenState::new());
+
+            if let Some(def) = &layer.motion {
+                motions.insert(
+                    layer.name.clone(),
+                    Motion2D::new(
+                        (0.0, 0.0),
+                        def.target,
+                        def.duration,
+                        def.easing.unwrap_or(crate::easing::Easing::Linear),
+                    ),
+                );
+            }
         }
 
         let mut image_variants = HashMap::new();
@@ -83,6 +97,7 @@ impl CharAnimator {
             eyes,
             image_overrides: HashMap::new(),
             image_variants,
+            motions,
         }
     }
 
@@ -119,16 +134,20 @@ impl CharAnimator {
         if let Some(eye) = &mut self.eyes {
             eye.update(self.time, rng);
         }
+
+        for motion in self.motions.values_mut() {
+            motion.update(delta_time);
+        }
     }
 
     /// Returns transformed sprites to render this frame.
     pub fn get_drawables(&mut self) -> Vec<DrawableSprite> {
         let mut output = Vec::new();
 
-        // Skip drawing alternate eye/mouth layers that don't match current state.
-        // This works in tandem with the shared EyesState and MouthState.
-        // This avoids rendering both versions at once and keeps everything visually in sync.
         for (i, layer) in self.rig.layers.iter().enumerate() {
+            // Skip drawing alternate eye/mouth layers that don't match current state.
+            // This works in tandem with the shared EyesState and MouthState.
+            // This avoids rendering both versions at once and keeps everything visually in sync.
             if let Some(eye) = &self.eyes {
                 if eye.is_blinking() && layer.image.contains("eyes_open") {
                     continue;
@@ -148,18 +167,29 @@ impl CharAnimator {
                     continue;
                 }
             }
-
+            // ================================================================================
+            // Apply effects from different systems
+            // ================================================================================
             let mut offset = layer.offset;
             let mut rotation = 0.0;
 
+            // Apply tween effect
             if let Some(tween) = &layer.tween {
                 let tween_state = &mut self.tweens[i];
-                let tween_offset = tween_state.update(1.0 / 60.0, tween); // Assume 60fps tick size
+                let tween_offset = tween_state.update(1.0 / 60.0, tween);
                 offset.0 += tween_offset.dx;
                 offset.1 += tween_offset.dy;
                 rotation = tween_offset.rotation;
             }
 
+            // Apply motion effect
+            if let Some(motion) = self.motions.get(&layer.name) {
+                let (dx, dy) = motion.value();
+                offset.0 += dx;
+                offset.1 += dy;
+            }
+
+            // Resolve layer image
             let final_image = self
                 .image_overrides
                 .get(&layer.name)
@@ -207,6 +237,16 @@ impl CharAnimator {
                     mouth.idle_chat();
                 }
             }
+            (_, "motion_play") => {
+                if let Some(motion) = self.motions.get_mut(layer) {
+                    motion.play();
+                }
+            }
+            (_, "motion_reverse") => {
+                if let Some(motion) = self.motions.get_mut(layer) {
+                    motion.reverse();
+                }
+            }
             (_, "tween_start") => {
                 if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
                     self.tweens[index].start();
@@ -236,6 +276,22 @@ impl CharAnimator {
             _ => {
                 eprintln!("Unknown trigger: {}/{}", layer, action);
             }
+        }
+    }
+
+    pub fn is_motion_finished(&mut self, layer: &str) -> bool {
+        if let Some(motion) = self.motions.get_mut(layer) {
+            motion.is_finished()
+        } else {
+            false
+        }
+    }
+
+    pub fn is_tween_enabled(&mut self, layer: &str) -> bool {
+        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
+            self.tweens[index].is_enabled()
+        } else {
+            false
         }
     }
 }

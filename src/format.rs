@@ -78,8 +78,21 @@ pub struct CharLayer {
     /// Optional animation for this layer
     pub tween: Option<Tween>,
 
+    /// Optional motion definition (used for Motion2D setup)
+    #[serde(default)]
+    pub motion: Option<MotionDef>,
+
     /// Optional list of alternative image filenames to swap into this layer
     pub variants: Option<HashMap<String, String>>,
+}
+
+/// Describes one-shot or directional motion animation.
+#[derive(Debug, Clone, Deserialize)]
+pub struct MotionDef {
+    pub target: (f32, f32),
+    pub duration: f32,
+    #[serde(default)]
+    pub easing: Option<Easing>,
 }
 
 /// A full character rig, consisting of multiple layers.
