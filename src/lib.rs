@@ -20,6 +20,8 @@ pub mod motion;
 pub mod quad;
 pub mod tween;
 
+pub mod palette;
+
 use anim::eyes::EyesState;
 use anim::mouth::MouthState;
 use format::CharRig;
@@ -41,6 +43,7 @@ pub struct DrawableSprite {
     pub rotation: f32,
     pub z_index: i32,
     pub alpha: f32,
+    pub tint: [f32; 4],
 }
 
 /// The character animator holds time state and generates drawables.
@@ -62,7 +65,6 @@ impl CharAnimator {
         let mut tweens = Vec::new();
         let mut motions = HashMap::new();
         let mut rotations = HashMap::new();
-        let mut visual_fx = VisualFxState::new();
 
         let has_mouth = rig.layers.iter().any(|l| l.name.contains("mouth"));
         let has_eyes = rig.layers.iter().any(|l| l.name.contains("eyes"));
@@ -91,9 +93,6 @@ impl CharAnimator {
                     );
                 }
             }
-
-            // Store base scale per layer for visual fx
-            visual_fx.base_scale.insert(layer.name.clone(), layer.scale);
         }
 
         let mut image_variants = HashMap::new();
@@ -116,9 +115,9 @@ impl CharAnimator {
             image_variants,
             motions,
             rotations,
-            visual_fx,
             time: 0.0,
             image_overrides: HashMap::new(),
+            visual_fx: VisualFxState::new(),
         }
     }
 
@@ -199,6 +198,7 @@ impl CharAnimator {
             let mut rotation = 0.0;
             let mut scale = layer.scale;
             let mut alpha = 1.0;
+            let mut tint = [1.0, 1.0, 1.0, 1.0];
 
             // Apply tween effect
             if let Some(tween) = &layer.tween {
@@ -227,6 +227,14 @@ impl CharAnimator {
                 if let Some(a) = fx_offset.alpha {
                     alpha *= a;
                 }
+                if let Some(t) = fx_offset.tint {
+                    tint = [
+                        tint[0] * t[0],
+                        tint[1] * t[1],
+                        tint[2] * t[2],
+                        tint[3] * t[3],
+                    ];
+                }
             }
 
             let final_image = self
@@ -242,6 +250,7 @@ impl CharAnimator {
                 rotation,
                 z_index: layer.z_index,
                 alpha,
+                tint,
             });
         }
 
@@ -367,5 +376,22 @@ impl CharAnimator {
     // Clear all FX
     pub fn clear_all_fx(&mut self) {
         self.visual_fx.clear_all_fx();
+    }
+
+    // Color Tint methods
+    pub fn set_tint(
+        &mut self,
+        layer: &str,
+        from: [f32; 4],
+        to: [f32; 4],
+        duration: f32,
+        easing: Easing,
+    ) {
+        self.visual_fx
+            .add_tint_fx(layer, crate::fx::make_tint_fx(from, to, duration, easing));
+    }
+
+    pub fn remove_tint(&mut self, layer: &str) {
+        self.visual_fx.remove_tint_fx(layer);
     }
 }

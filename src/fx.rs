@@ -29,10 +29,21 @@ pub struct AlphaFxKind {
     pub finished: bool,
 }
 
+#[derive(Clone, Debug)]
+pub struct TintFxKind {
+    pub from: [f32; 4],
+    pub to: [f32; 4],
+    pub duration: f32,
+    pub easing: Easing,
+    pub elapsed: f32,
+    pub finished: bool,
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct TransformOffset {
     pub scale: Option<f32>,
     pub alpha: Option<f32>,
+    pub tint: Option<[f32; 4]>,
 }
 
 #[derive(Debug)]
@@ -40,7 +51,7 @@ pub struct VisualFxState {
     time: f32,
     scale_fx: HashMap<String, ScaleFxKind>,
     alpha_fx: HashMap<String, AlphaFxKind>,
-    pub base_scale: HashMap<String, f32>,
+    tint_fx: HashMap<String, TintFxKind>,
 }
 
 impl VisualFxState {
@@ -49,30 +60,36 @@ impl VisualFxState {
             time: 0.0,
             scale_fx: HashMap::new(),
             alpha_fx: HashMap::new(),
-            base_scale: HashMap::new(),
+            tint_fx: HashMap::new(),
         }
     }
 
     pub fn update(&mut self, dt: f32) {
         self.time += dt;
 
+        fn advance(elapsed: &mut f32, duration: f32, finished: &mut bool, dt: f32) {
+            *elapsed += dt;
+            if *elapsed >= duration {
+                *elapsed = duration;
+                *finished = true;
+            }
+        }
+
         for fx in self.scale_fx.values_mut() {
             if !fx.finished {
-                fx.elapsed += dt;
-                if fx.elapsed >= fx.duration {
-                    fx.elapsed = fx.duration;
-                    fx.finished = true;
-                }
+                advance(&mut fx.elapsed, fx.duration, &mut fx.finished, dt);
             }
         }
 
         for fx in self.alpha_fx.values_mut() {
             if !fx.finished {
-                fx.elapsed += dt;
-                if fx.elapsed >= fx.duration {
-                    fx.elapsed = fx.duration;
-                    fx.finished = true;
-                }
+                advance(&mut fx.elapsed, fx.duration, &mut fx.finished, dt);
+            }
+        }
+
+        for fx in self.tint_fx.values_mut() {
+            if !fx.finished {
+                advance(&mut fx.elapsed, fx.duration, &mut fx.finished, dt);
             }
         }
     }
@@ -92,7 +109,19 @@ impl VisualFxState {
             result.alpha = Some(fx.from + (fx.to - fx.from) * factor);
         }
 
-        if result.scale.is_some() || result.alpha.is_some() {
+        if let Some(fx) = self.tint_fx.get(layer) {
+            let progress = (fx.elapsed / fx.duration).min(1.0);
+            let factor = resolve_easing(fx.easing, progress);
+            let tint = [
+                fx.from[0] + (fx.to[0] - fx.from[0]) * factor,
+                fx.from[1] + (fx.to[1] - fx.from[1]) * factor,
+                fx.from[2] + (fx.to[2] - fx.from[2]) * factor,
+                fx.from[3] + (fx.to[3] - fx.from[3]) * factor,
+            ];
+            result.tint = Some(tint);
+        }
+
+        if result.scale.is_some() || result.alpha.is_some() || result.tint.is_some() {
             Some(result)
         } else {
             None
@@ -108,6 +137,10 @@ impl VisualFxState {
         self.alpha_fx.insert(layer.to_string(), fx);
     }
 
+    pub fn add_tint_fx(&mut self, layer: &str, fx: TintFxKind) {
+        self.tint_fx.insert(layer.to_string(), fx);
+    }
+
     pub fn remove_scale_fx(&mut self, layer: &str) {
         self.scale_fx.remove(layer);
     }
@@ -116,9 +149,14 @@ impl VisualFxState {
         self.alpha_fx.remove(layer);
     }
 
+    pub fn remove_tint_fx(&mut self, layer: &str) {
+        self.tint_fx.remove(layer);
+    }
+
     pub fn clear_all_fx(&mut self) {
         self.scale_fx.clear();
         self.alpha_fx.clear();
+        self.tint_fx.clear();
     }
 }
 
@@ -138,6 +176,18 @@ pub fn make_scale_fx(from: f32, to: f32, duration: f32, easing: Easing) -> Scale
 /// Returns an alpha animation from one value to another
 pub fn make_alpha_fx(from: f32, to: f32, duration: f32, easing: Easing) -> AlphaFxKind {
     AlphaFxKind {
+        from,
+        to,
+        duration,
+        easing,
+        elapsed: 0.0,
+        finished: false,
+    }
+}
+
+/// Returns a tint animation from one color to another (RGBA)
+pub fn make_tint_fx(from: [f32; 4], to: [f32; 4], duration: f32, easing: Easing) -> TintFxKind {
+    TintFxKind {
         from,
         to,
         duration,

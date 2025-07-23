@@ -95,7 +95,12 @@ impl EmotivaQuad {
                     tex,
                     pos.x,
                     pos.y,
-                    Color::new(1.0, 1.0, 1.0, sprite.alpha),
+                    Color::new(
+                        sprite.tint[0],
+                        sprite.tint[1],
+                        sprite.tint[2],
+                        sprite.alpha * sprite.tint[3],
+                    ),
                     params,
                 );
             }
@@ -148,5 +153,21 @@ impl EmotivaQuad {
 
     pub fn clear_all_fx(&mut self) {
         self.animator.clear_all_fx();
+    }
+
+    // Color Tint API
+    pub fn set_color(
+        &mut self,
+        layer: &str,
+        from: [f32; 4],
+        to: [f32; 4],
+        duration: f32,
+        easing: Easing,
+    ) {
+        self.animator.set_tint(layer, from, to, duration, easing)
+    }
+
+    pub fn remove_color(&mut self, layer: &str) {
+        self.animator.remove_tint(layer);
     }
 }
