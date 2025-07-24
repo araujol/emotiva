@@ -126,10 +126,40 @@ impl EmotivaQuad {
         self.animator.trigger(layer, action);
     }
 
+    //==== TWEEN API ========//
+    pub fn tween_start(&mut self, layer: &str) {
+        self.animator.tween_start(layer);
+    }
+
+    pub fn tween_stop(&mut self, layer: &str) {
+        self.animator.tween_stop(layer);
+    }
+
+    pub fn tween_start_easing(&mut self, layer: &str) {
+        self.animator.tween_start_easing(layer);
+    }
+
+    pub fn tween_stop_easing(&mut self, layer: &str) {
+        self.animator.tween_stop_easing(layer);
+    }
+
+    pub fn tween_pause(&mut self, layer: &str) {
+        self.animator.tween_pause(layer);
+    }
+
+    pub fn tween_resume(&mut self, layer: &str) {
+        self.animator.tween_resume(layer);
+    }
+
     pub fn is_tween_enabled(&mut self, layer: &str) -> bool {
         return self.animator.is_tween_enabled(layer);
     }
 
+    pub fn is_tween_paused(&mut self, layer: &str) -> bool {
+        return self.animator.is_tween_paused(layer);
+    }
+
+    // Motion system API
     pub fn is_motion_finished(&mut self, layer: &str) -> bool {
         return self.animator.is_motion_finished(layer);
     }

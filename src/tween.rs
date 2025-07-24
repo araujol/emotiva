@@ -12,7 +12,8 @@ use crate::format::Tween;
 pub struct TweenState {
     time: f32,
     enabled: bool,
-    ease_in_state: Option<(f32, TweenOffset)>, // (progress, target offset)
+    paused: bool,                               // whether this tween is paused
+    ease_in_state: Option<(f32, TweenOffset)>,  // (progress, target offset)
     ease_out_state: Option<(f32, TweenOffset)>, // (progress, starting offset)
 }
 
@@ -21,6 +22,7 @@ impl Default for TweenState {
         Self {
             time: 0.0,
             enabled: false,
+            paused: false,
             ease_in_state: None,
             ease_out_state: None,
         }
@@ -63,20 +65,38 @@ impl TweenState {
 
     pub fn start(&mut self) {
         self.enabled = true;
+        self.paused = false;
     }
 
     pub fn stop(&mut self) {
         self.enabled = false;
+        self.paused = false;
+        self.time = 0.0;
+        self.ease_in_state = None;
+        self.ease_out_state = None;
+    }
+
+    pub fn pause(&mut self) {
+        self.paused = true;
+    }
+
+    pub fn resume(&mut self) {
+        self.paused = false;
     }
 
     pub fn is_enabled(&mut self) -> bool {
         return self.enabled;
     }
 
+    pub fn is_paused(&mut self) -> bool {
+        return self.paused;
+    }
+
     /// Start animation with easing in.
     pub fn start_easing(&mut self, _tween: &Tween) {
         self.time = 0.0;
-        self.enabled = false;
+        self.enabled = false; // becomes true after easing
+        self.paused = false;
         self.ease_in_state = Some((0.0, TweenOffset::zero())); // always start from zero
     }
 
@@ -84,7 +104,9 @@ impl TweenState {
     pub fn stop_easing(&mut self, tween: &Tween) {
         let current_offset = self.compute_offset(tween);
         self.enabled = false;
+        self.paused = false;
         self.ease_out_state = Some((0.0, current_offset));
+        self.time = 0.0;
     }
 
     /// Compute current offset for the current time
@@ -108,6 +130,11 @@ impl TweenState {
 
     /// Advance time and compute the current offset for a given sway definition.
     pub fn update(&mut self, dt: f32, tween: &Tween) -> TweenOffset {
+        // Return the current offset if paused.
+        if self.paused {
+            return self.compute_offset(tween);
+        }
+
         if let Some((ref mut start_time, start_target)) = self.ease_in_state {
             let easing_duration = 1.0;
             *start_time += dt / easing_duration;

@@ -1,0 +1,18 @@
+(
+    layers: [
+        (
+            name: "doll",
+            image: "kokeshi.png",
+            offset: (768.0, 512.0),
+            scale: 0.7,
+            z_index: 0,
+            tween: Some((
+                sway: (320.0, 0.0),
+                lean: None,
+                period: 5.0,
+                easing_start: Some(SineOut),
+                easing_stop: Some(SineIn),
+            )),
+        ),
+    ],
+)

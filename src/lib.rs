@@ -302,30 +302,6 @@ impl CharAnimator {
                     rotation.reverse();
                 }
             }
-            (_, "tween_start") => {
-                if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-                    self.tweens[index].start();
-                }
-            }
-            (_, "tween_stop") => {
-                if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-                    self.tweens[index].stop();
-                }
-            }
-            (_, "tween_start_easing") => {
-                if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-                    if let Some(tween) = &self.rig.layers[index].tween {
-                        self.tweens[index].start_easing(tween);
-                    }
-                }
-            }
-            (_, "tween_stop_easing") => {
-                if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-                    if let Some(tween) = &self.rig.layers[index].tween {
-                        self.tweens[index].stop_easing(tween);
-                    }
-                }
-            }
             _ => {
                 eprintln!("Unknown trigger: {}/{}", layer, action);
             }
@@ -346,9 +322,58 @@ impl CharAnimator {
         motion_done && rotation_done
     }
 
+    // Tween system API
+    pub fn tween_start(&mut self, layer: &str) {
+        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
+            self.tweens[index].start();
+        }
+    }
+
+    pub fn tween_stop(&mut self, layer: &str) {
+        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
+            self.tweens[index].stop();
+        }
+    }
+
+    pub fn tween_start_easing(&mut self, layer: &str) {
+        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
+            if let Some(tween) = &self.rig.layers[index].tween {
+                self.tweens[index].start_easing(tween);
+            }
+        }
+    }
+
+    pub fn tween_stop_easing(&mut self, layer: &str) {
+        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
+            if let Some(tween) = &self.rig.layers[index].tween {
+                self.tweens[index].stop_easing(tween);
+            }
+        }
+    }
+
+    pub fn tween_pause(&mut self, layer: &str) {
+        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
+            self.tweens[index].pause();
+        }
+    }
+
+    pub fn tween_resume(&mut self, layer: &str) {
+        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
+            self.tweens[index].resume();
+        }
+    }
+
     pub fn is_tween_enabled(&mut self, layer: &str) -> bool {
         if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
             self.tweens[index].is_enabled()
+        } else {
+            false
+        }
+    }
+
+    pub fn is_tween_paused(&mut self, layer: &str) -> bool {
+        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
+            self.tweens[index].is_paused()
         } else {
             false
         }
