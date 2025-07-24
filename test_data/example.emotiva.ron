@@ -7,15 +7,9 @@
             scale: 0.7,
             z_index: 0,
             tween: Some((
-                sway: (0.0, 1.0),
-                lean: Some((max_angle: 0.08)),
-                period: 2.5,
+                sway: (0.0, 2.0),
+                period: 4.5,
             )),
-            motion: Some((
-                target: (-250.0, -100.0), 
-                duration: 3.0,
-                easing: Some(QuadIn)
-            ))
         ),
         (
             name: "eyes",
@@ -24,14 +18,9 @@
             scale: 0.2,
             z_index: 1,
             tween: Some((
-                sway: (0.3, 0.0),
+                sway: (0.5, 0.0),
                 period: 2.5,
             )),
-            motion: Some((
-                target: (-250.0, -100.0), 
-                duration: 3.0,
-                easing: Some(QuadIn)
-            ))
         ),
         (
             name: "eyes",
@@ -40,14 +29,9 @@
             scale: 0.2,
             z_index: 1,
             tween: Some((
-                sway: (0.3, 0.0),
+                sway: (0.5, 0.0),
                 period: 2.5,
             )),
-            motion: Some((
-                target: (-250.0, -100.0), 
-                duration: 3.0,
-                easing: Some(QuadIn)
-            ))
         ),
         (
             name: "mouth",
@@ -59,11 +43,6 @@
                 sway: (1.0, 0.0),
                 period: 0.5,
             )),
-            motion: Some((
-                target: (-250.0, -100.0), 
-                duration: 3.0,
-                easing: Some(QuadIn)
-            ))
         ),
     ],
 )
