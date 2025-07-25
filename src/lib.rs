@@ -18,6 +18,7 @@ pub mod format;
 pub mod fx;
 pub mod motion;
 pub mod quad;
+pub mod transform;
 pub mod tween;
 
 pub mod palette;
@@ -168,12 +169,20 @@ impl CharAnimator {
 
     /// Returns transformed sprites to render this frame.
     pub fn get_drawables(&mut self) -> Vec<DrawableSprite> {
-        let mut output = Vec::new();
+        use crate::transform::resolve_all_transforms;
 
-        for (i, layer) in self.rig.layers.iter().enumerate() {
-            // Skip drawing alternate eye/mouth layers that don't match current state.
-            // This works in tandem with the shared EyesState and MouthState.
-            // This avoids rendering both versions at once and keeps everything visually in sync.
+        let mut output = Vec::new();
+        let transforms = resolve_all_transforms(
+            &self.rig,
+            &mut self.tweens,
+            &self.motions,
+            &self.rotations,
+            &self.visual_fx,
+            1.0 / 60.0,
+        );
+
+        for layer in &self.rig.layers {
+            // Skip eye and mouth conditions
             if let Some(eye) = &self.eyes {
                 if eye.is_blinking() && layer.image.contains("eyes_open") {
                     continue;
@@ -184,58 +193,16 @@ impl CharAnimator {
             }
 
             if let Some(mouth) = &self.mouth {
-                // Skip mouth_closed if mouth is open
                 if mouth.is_open(self.time) && layer.image.contains("mouth_closed") {
                     continue;
                 }
-                // Skip mouth_open if mouth is closed
                 if !mouth.is_open(self.time) && layer.image.contains("mouth_open") {
                     continue;
                 }
             }
 
-            let mut offset = layer.offset;
-            let mut rotation = 0.0;
-            let mut scale = layer.scale;
-            let mut alpha = 1.0;
-            let mut tint = [1.0, 1.0, 1.0, 1.0];
-
-            // Apply tween effect
-            if let Some(tween) = &layer.tween {
-                let tween_state = &mut self.tweens[i];
-                let tween_offset = tween_state.update(1.0 / 60.0, tween);
-                offset.0 += tween_offset.dx;
-                offset.1 += tween_offset.dy;
-                rotation = tween_offset.rotation;
-            }
-
-            // Apply motion effect
-            if let Some(motion) = self.motions.get(&layer.name) {
-                let (dx, dy) = motion.value();
-                offset.0 += dx;
-                offset.1 += dy;
-            }
-
-            if let Some(rot) = self.rotations.get(&layer.name) {
-                rotation += rot.value();
-            }
-
-            if let Some(fx_offset) = self.visual_fx.get_fx(&layer.name) {
-                if let Some(s) = fx_offset.scale {
-                    scale *= s;
-                }
-                if let Some(a) = fx_offset.alpha {
-                    alpha *= a;
-                }
-                if let Some(t) = fx_offset.tint {
-                    tint = [
-                        tint[0] * t[0],
-                        tint[1] * t[1],
-                        tint[2] * t[2],
-                        tint[3] * t[3],
-                    ];
-                }
-            }
+            let fallback = &transform::WorldTransform::default();
+            let transform = transforms.get(&layer.name).unwrap_or(fallback);
 
             let final_image = self
                 .image_overrides
@@ -245,12 +212,12 @@ impl CharAnimator {
 
             output.push(DrawableSprite {
                 image: final_image,
-                position: offset,
-                scale,
-                rotation,
+                position: (transform.position.x, transform.position.y),
+                scale: transform.scale,
+                rotation: transform.rotation,
                 z_index: layer.z_index,
-                alpha,
-                tint,
+                alpha: transform.alpha,
+                tint: transform.tint,
             });
         }
 

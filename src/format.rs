@@ -67,10 +67,10 @@ pub struct CharLayer {
     pub image: String,
 
     /// Position offset (x, y) in pixels
-    pub offset: (f32, f32),
+    pub offset: Option<(f32, f32)>,
 
     /// Scale multiplier (1.0 = original size)
-    pub scale: f32,
+    pub scale: Option<f32>,
 
     /// Draw order (lower = behind, higher = in front)
     pub z_index: i32,
@@ -84,6 +84,12 @@ pub struct CharLayer {
 
     /// Optional list of alternative image filenames to swap into this layer
     pub variants: Option<HashMap<String, String>>,
+
+    // Optional parent layer to inherit transform from
+    pub parent: Option<String>,
+
+    // Whether to inherit parent's transform (default: true)
+    pub inherit: Option<bool>,
 }
 
 /// Describes one-shot or directional motion animation.
