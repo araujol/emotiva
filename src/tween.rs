@@ -153,17 +153,15 @@ impl TweenState {
         offset
     }
 
-    /// Advance time and compute the current offset for a given sway definition.
-    /// Returns both the offset and any event triggered (e.g., started, paused, resumed, completed).
-    pub fn update(&mut self, dt: f32, tween: &Tween) -> (TweenOffset, AnimEvent) {
-        // Return the current offset if paused.
+    /// Only updates internal state (time, easing progression) and returns any AnimEvent.
+    pub fn update(&mut self, dt: f32) -> AnimEvent {
         if self.paused {
-            return (self.compute_offset(tween), AnimEvent::Paused);
+            return AnimEvent::Paused;
         }
 
         let mut event = AnimEvent::None;
 
-        if let Some((ref mut start_time, start_target)) = self.ease_in_state {
+        if let Some((ref mut start_time, _start_target)) = self.ease_in_state {
             let easing_duration = 1.0;
             *start_time += dt / easing_duration;
             let t = (*start_time).min(1.0);
@@ -172,12 +170,9 @@ impl TweenState {
                 self.enabled = true;
                 event = AnimEvent::Started;
             }
-            let t_eased = resolve(tween.easing_start.unwrap_or(Easing::SineIn), t);
-            (TweenOffset::zero().lerp(start_target, t_eased), event)
         } else if self.enabled {
             self.time += dt;
-            (self.compute_offset(tween), event)
-        } else if let Some((ref mut easing_time, start_offset)) = self.ease_out_state {
+        } else if let Some((ref mut easing_time, _start_offset)) = self.ease_out_state {
             let easing_duration = 1.0;
             *easing_time += dt / easing_duration;
             let t = (*easing_time).min(1.0);
@@ -185,10 +180,25 @@ impl TweenState {
                 self.ease_out_state = None;
                 event = AnimEvent::Completed;
             }
+        }
+
+        event
+    }
+
+    /// Calculates and returns the current TweenOffset based on state.
+    pub fn value(&self, tween: &Tween) -> TweenOffset {
+        if let Some((start_time, start_target)) = self.ease_in_state {
+            let t = start_time.min(1.0);
+            let t_eased = resolve(tween.easing_start.unwrap_or(Easing::SineIn), t);
+            TweenOffset::zero().lerp(start_target, t_eased)
+        } else if self.enabled {
+            self.compute_offset(tween)
+        } else if let Some((easing_time, start_offset)) = self.ease_out_state {
+            let t = easing_time.min(1.0);
             let t_eased = resolve(tween.easing_stop.unwrap_or(Easing::SineOut), t);
-            (start_offset.lerp(TweenOffset::zero(), t_eased), event)
+            start_offset.lerp(TweenOffset::zero(), t_eased)
         } else {
-            (TweenOffset::zero(), event)
+            TweenOffset::zero()
         }
     }
 }

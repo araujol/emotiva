@@ -157,6 +157,10 @@ impl CharAnimator {
             eye.update(self.time, rng);
         }
 
+        for tween in self.tweens.iter_mut() {
+            tween.update(delta_time);
+        }
+
         for motion in self.motions.values_mut() {
             motion.update(delta_time);
         }
@@ -179,7 +183,6 @@ impl CharAnimator {
             &self.motions,
             &self.rotations,
             &self.visual_fx,
-            1.0 / 60.0,
         );
 
         for layer in &self.rig.layers {

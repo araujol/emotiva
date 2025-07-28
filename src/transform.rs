@@ -47,7 +47,6 @@ pub fn resolve_all_transforms(
     motions: &HashMap<String, Motion2D>,
     rotations: &HashMap<String, Rotation>,
     fx: &VisualFxState,
-    time: f32,
 ) -> HashMap<String, WorldTransform> {
     let mut result = HashMap::new();
 
@@ -60,7 +59,6 @@ pub fn resolve_all_transforms(
             motions,
             rotations,
             fx,
-            time,
         );
         result.insert(layer.name.clone(), transform);
     }
@@ -76,7 +74,6 @@ fn resolve_layer_transform(
     motions: &HashMap<String, Motion2D>,
     rotations: &HashMap<String, Rotation>,
     fx: &VisualFxState,
-    time: f32,
 ) -> WorldTransform {
     let layer = rig.layers.iter().find(|l| l.name == name).unwrap();
 
@@ -91,7 +88,7 @@ fn resolve_layer_transform(
     if let Some(index) = rig.layers.iter().position(|l| l.name == layer.name) {
         if let Some(tween) = &layer.tween {
             if let Some(state) = tweens.get_mut(index) {
-                let (offs, _event) = state.update(time, tween);
+                let offs = state.value(tween);
                 pos += Vec2::new(offs.dx, offs.dy);
                 rot += offs.rotation;
             }
