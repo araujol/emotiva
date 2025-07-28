@@ -257,25 +257,34 @@ impl CharAnimator {
                     mouth.idle_chat();
                 }
             }
-            (_, "motion_play") => {
-                if let Some(motion) = self.motions.get_mut(layer) {
-                    motion.play();
-                }
-                if let Some(rotation) = self.rotations.get_mut(layer) {
-                    rotation.play();
-                }
-            }
-            (_, "motion_reverse") => {
-                if let Some(motion) = self.motions.get_mut(layer) {
-                    motion.reverse();
-                }
-                if let Some(rotation) = self.rotations.get_mut(layer) {
-                    rotation.reverse();
-                }
-            }
             _ => {
                 eprintln!("Unknown trigger: {}/{}", layer, action);
             }
+        }
+    }
+
+    // Motion API
+    pub fn motion_play(&mut self, layer: &str) {
+        if let Some(motion) = self.motions.get_mut(layer) {
+            motion.play();
+        }
+    }
+
+    pub fn motion_reverse(&mut self, layer: &str) {
+        if let Some(motion) = self.motions.get_mut(layer) {
+            motion.reverse();
+        }
+    }
+
+    pub fn rotation_play(&mut self, layer: &str) {
+        if let Some(rotation) = self.rotations.get_mut(layer) {
+            rotation.play();
+        }
+    }
+
+    pub fn rotation_reverse(&mut self, layer: &str) {
+        if let Some(rotation) = self.rotations.get_mut(layer) {
+            rotation.reverse();
         }
     }
 
@@ -285,12 +294,16 @@ impl CharAnimator {
             .get_mut(layer)
             .map(|m| m.is_finished())
             .unwrap_or(true);
+        motion_done
+    }
+
+    pub fn is_rotation_finished(&mut self, layer: &str) -> bool {
         let rotation_done = self
             .rotations
             .get_mut(layer)
             .map(|r| r.is_finished())
             .unwrap_or(true);
-        motion_done && rotation_done
+        rotation_done
     }
 
     // Tween system API
