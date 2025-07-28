@@ -91,7 +91,7 @@ fn resolve_layer_transform(
     if let Some(index) = rig.layers.iter().position(|l| l.name == layer.name) {
         if let Some(tween) = &layer.tween {
             if let Some(state) = tweens.get_mut(index) {
-                let offs = state.update(time, tween);
+                let (offs, _event) = state.update(time, tween);
                 pos += Vec2::new(offs.dx, offs.dy);
                 rot += offs.rotation;
             }

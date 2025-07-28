@@ -14,6 +14,7 @@
 
 pub mod anim;
 pub mod easing;
+pub mod events;
 pub mod format;
 pub mod fx;
 pub mod motion;

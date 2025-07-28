@@ -6,6 +6,7 @@
 //! such as smooth movement, pose shifts, or rotation transitions during scene changes.
 
 use crate::easing::{Easing, resolve};
+use crate::events::AnimEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction {
@@ -37,28 +38,57 @@ impl Motion2D {
         }
     }
 
-    pub fn play(&mut self) {
+    pub fn play(&mut self) -> AnimEvent {
         self.elapsed = 0.0;
         self.direction = Direction::Forward;
+        let was_playing = self.playing;
         self.playing = true;
+        if !was_playing {
+            AnimEvent::Started
+        } else {
+            AnimEvent::None
+        }
     }
 
-    pub fn reverse(&mut self) {
+    pub fn reverse(&mut self) -> AnimEvent {
         self.elapsed = 0.0;
         self.direction = Direction::Reverse;
+        let was_playing = self.playing;
         self.playing = true;
+        if !was_playing {
+            AnimEvent::Started
+        } else {
+            AnimEvent::None
+        }
     }
 
-    pub fn update(&mut self, dt: f32) {
+    pub fn update(&mut self, dt: f32) -> AnimEvent {
+        // If not playing, no state change.
         if !self.playing {
-            return;
+            return AnimEvent::None;
         }
 
+        // Signal Started for the very first frame after play() or reverse()
+        if self.elapsed == 0.0 {
+            // Increment time but still return Started this frame.
+            self.elapsed += dt;
+            if self.elapsed >= self.duration {
+                self.elapsed = self.duration;
+                self.playing = false;
+                return AnimEvent::Completed;
+            }
+            return AnimEvent::Started;
+        }
+
+        // Continue running.
         self.elapsed += dt;
 
         if self.elapsed >= self.duration {
             self.elapsed = self.duration;
             self.playing = false;
+            AnimEvent::Completed
+        } else {
+            AnimEvent::None
         }
     }
 
@@ -95,16 +125,16 @@ impl Rotation {
         }
     }
 
-    pub fn update(&mut self, dt: f32) {
-        self.motion.update(dt);
+    pub fn update(&mut self, dt: f32) -> AnimEvent {
+        self.motion.update(dt)
     }
 
-    pub fn play(&mut self) {
-        self.motion.play();
+    pub fn play(&mut self) -> AnimEvent {
+        self.motion.play()
     }
 
-    pub fn reverse(&mut self) {
-        self.motion.reverse();
+    pub fn reverse(&mut self) -> AnimEvent {
+        self.motion.reverse()
     }
 
     pub fn value(&self) -> f32 {

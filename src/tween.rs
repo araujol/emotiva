@@ -5,6 +5,7 @@
 //! These animations loop continuously and add natural motion to static images.
 
 use crate::easing::{Easing, resolve};
+use crate::events::AnimEvent;
 use crate::format::Tween;
 
 /// Represents the animated state of a tweened layer at runtime.
@@ -63,50 +64,74 @@ impl TweenState {
         Self::default()
     }
 
-    pub fn start(&mut self) {
-        self.enabled = true;
-        self.paused = false;
+    pub fn is_enabled(&mut self) -> bool {
+        self.enabled
     }
 
-    pub fn stop(&mut self) {
+    pub fn is_paused(&mut self) -> bool {
+        self.paused
+    }
+
+    pub fn start(&mut self) -> AnimEvent {
+        let already_enabled = self.enabled;
+        self.enabled = true;
+        self.paused = false;
+        if !already_enabled {
+            AnimEvent::Started
+        } else {
+            AnimEvent::None
+        }
+    }
+
+    pub fn stop(&mut self) -> AnimEvent {
+        let was_enabled = self.enabled || self.ease_in_state.is_some();
         self.enabled = false;
         self.paused = false;
         self.time = 0.0;
         self.ease_in_state = None;
         self.ease_out_state = None;
+        if was_enabled {
+            AnimEvent::Completed
+        } else {
+            AnimEvent::None
+        }
     }
 
-    pub fn pause(&mut self) {
+    pub fn pause(&mut self) -> AnimEvent {
+        let was_paused = self.paused;
         self.paused = true;
+        if !was_paused {
+            AnimEvent::Paused
+        } else {
+            AnimEvent::None
+        }
     }
 
-    pub fn resume(&mut self) {
+    pub fn resume(&mut self) -> AnimEvent {
+        let was_paused = self.paused;
         self.paused = false;
+        if was_paused {
+            AnimEvent::Resumed
+        } else {
+            AnimEvent::None
+        }
     }
 
-    pub fn is_enabled(&mut self) -> bool {
-        return self.enabled;
-    }
-
-    pub fn is_paused(&mut self) -> bool {
-        return self.paused;
-    }
-
-    /// Start animation with easing in.
-    pub fn start_easing(&mut self, _tween: &Tween) {
+    pub fn start_easing(&mut self, _tween: &Tween) -> AnimEvent {
         self.time = 0.0;
         self.enabled = false; // becomes true after easing
         self.paused = false;
         self.ease_in_state = Some((0.0, TweenOffset::zero())); // always start from zero
+        AnimEvent::Started
     }
 
-    /// Manually stop animation with easing out.
-    pub fn stop_easing(&mut self, tween: &Tween) {
+    pub fn stop_easing(&mut self, tween: &Tween) -> AnimEvent {
         let current_offset = self.compute_offset(tween);
         self.enabled = false;
         self.paused = false;
         self.ease_out_state = Some((0.0, current_offset));
         self.time = 0.0;
+        AnimEvent::Completed
     }
 
     /// Compute current offset for the current time
@@ -129,11 +154,14 @@ impl TweenState {
     }
 
     /// Advance time and compute the current offset for a given sway definition.
-    pub fn update(&mut self, dt: f32, tween: &Tween) -> TweenOffset {
+    /// Returns both the offset and any event triggered (e.g., started, paused, resumed, completed).
+    pub fn update(&mut self, dt: f32, tween: &Tween) -> (TweenOffset, AnimEvent) {
         // Return the current offset if paused.
         if self.paused {
-            return self.compute_offset(tween);
+            return (self.compute_offset(tween), AnimEvent::Paused);
         }
+
+        let mut event = AnimEvent::None;
 
         if let Some((ref mut start_time, start_target)) = self.ease_in_state {
             let easing_duration = 1.0;
@@ -142,23 +170,25 @@ impl TweenState {
             if t >= 1.0 {
                 self.ease_in_state = None;
                 self.enabled = true;
+                event = AnimEvent::Started;
             }
             let t_eased = resolve(tween.easing_start.unwrap_or(Easing::SineIn), t);
-            TweenOffset::zero().lerp(start_target, t_eased)
+            (TweenOffset::zero().lerp(start_target, t_eased), event)
         } else if self.enabled {
             self.time += dt;
-            self.compute_offset(tween)
+            (self.compute_offset(tween), event)
         } else if let Some((ref mut easing_time, start_offset)) = self.ease_out_state {
             let easing_duration = 1.0;
             *easing_time += dt / easing_duration;
             let t = (*easing_time).min(1.0);
             if t >= 1.0 {
                 self.ease_out_state = None;
+                event = AnimEvent::Completed;
             }
             let t_eased = resolve(tween.easing_stop.unwrap_or(Easing::SineOut), t);
-            start_offset.lerp(TweenOffset::zero(), t_eased)
+            (start_offset.lerp(TweenOffset::zero(), t_eased), event)
         } else {
-            TweenOffset::zero()
+            (TweenOffset::zero(), event)
         }
     }
 }

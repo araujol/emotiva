@@ -7,6 +7,7 @@
 //! Designed for composability and integration with `CharAnimator`.
 
 use crate::easing::{Easing, resolve as resolve_easing};
+use crate::events::AnimEvent;
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
@@ -64,34 +65,49 @@ impl VisualFxState {
         }
     }
 
-    pub fn update(&mut self, dt: f32) {
+    /// Updates all FX objects and reports if any started or finished.
+    pub fn update(&mut self, dt: f32) -> AnimEvent {
         self.time += dt;
+        let mut event = AnimEvent::None;
 
-        fn advance(elapsed: &mut f32, duration: f32, finished: &mut bool, dt: f32) {
-            *elapsed += dt;
-            if *elapsed >= duration {
-                *elapsed = duration;
-                *finished = true;
+        fn advance(elapsed: &mut f32, duration: f32, finished: &mut bool, dt: f32) -> AnimEvent {
+            if !*finished {
+                *elapsed += dt;
+                if *elapsed >= duration {
+                    *elapsed = duration;
+                    *finished = true;
+                    return AnimEvent::Completed;
+                }
+                if *elapsed == 0.0 {
+                    return AnimEvent::Started;
+                }
             }
+            AnimEvent::None
         }
 
+        // FIX: Emitted signals should differentiate FX.
         for fx in self.scale_fx.values_mut() {
-            if !fx.finished {
-                advance(&mut fx.elapsed, fx.duration, &mut fx.finished, dt);
+            let e = advance(&mut fx.elapsed, fx.duration, &mut fx.finished, dt);
+            if let AnimEvent::Started | AnimEvent::Completed = e {
+                event = e;
             }
         }
 
         for fx in self.alpha_fx.values_mut() {
-            if !fx.finished {
-                advance(&mut fx.elapsed, fx.duration, &mut fx.finished, dt);
+            let e = advance(&mut fx.elapsed, fx.duration, &mut fx.finished, dt);
+            if let AnimEvent::Started | AnimEvent::Completed = e {
+                event = e;
             }
         }
 
         for fx in self.tint_fx.values_mut() {
-            if !fx.finished {
-                advance(&mut fx.elapsed, fx.duration, &mut fx.finished, dt);
+            let e = advance(&mut fx.elapsed, fx.duration, &mut fx.finished, dt);
+            if let AnimEvent::Started | AnimEvent::Completed = e {
+                event = e;
             }
         }
+
+        event
     }
 
     pub fn get_fx(&self, layer: &str) -> Option<TransformOffset> {
