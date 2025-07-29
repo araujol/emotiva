@@ -52,19 +52,19 @@ pub struct DrawableSprite {
 pub struct CharAnimator {
     pub rig: CharRig,
     pub time: f32,
-    pub tweens: Vec<TweenState>,
     pub mouth: Option<MouthState>,
     pub eyes: Option<EyesState>,
     pub image_overrides: HashMap<String, String>, // layer name -> image override
     pub image_variants: HashMap<String, HashMap<String, String>>, // layer -> variant_name -> image
-    pub motions: HashMap<String, Motion2D>,       // layer name -> motion animation
+    pub tweens: HashMap<String, TweenState>,
+    pub motions: HashMap<String, Motion2D>, // layer name -> motion animation
     pub rotations: HashMap<String, Rotation>,
     pub visual_fx: VisualFxState,
 }
 
 impl CharAnimator {
     pub fn new(rig: CharRig, rng: &mut impl Rng) -> Self {
-        let mut tweens = Vec::new();
+        let mut tweens = HashMap::new();
         let mut motions = HashMap::new();
         let mut rotations = HashMap::new();
 
@@ -74,8 +74,8 @@ impl CharAnimator {
         let mouth = has_mouth.then(|| MouthState::new(0.0, rng));
         let eyes = has_eyes.then(|| EyesState::new(0.0, rng));
 
-        for (_i, layer) in rig.layers.iter().enumerate() {
-            tweens.push(TweenState::new());
+        for layer in rig.layers.iter() {
+            tweens.insert(layer.name.clone(), TweenState::new());
 
             if let Some(def) = &layer.motion {
                 motions.insert(
@@ -157,7 +157,7 @@ impl CharAnimator {
             eye.update(self.time, rng);
         }
 
-        for tween in self.tweens.iter_mut() {
+        for tween in self.tweens.values_mut() {
             tween.update(delta_time);
         }
 
@@ -308,59 +308,61 @@ impl CharAnimator {
 
     // Tween system API
     pub fn tween_start(&mut self, layer: &str) {
-        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-            self.tweens[index].start();
+        if let Some(tween) = self.tweens.get_mut(layer) {
+            tween.start();
         }
     }
 
     pub fn tween_stop(&mut self, layer: &str) {
-        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-            self.tweens[index].stop();
+        if let Some(tween) = self.tweens.get_mut(layer) {
+            tween.stop();
         }
     }
 
     pub fn tween_start_easing(&mut self, layer: &str) {
-        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-            if let Some(tween) = &self.rig.layers[index].tween {
-                self.tweens[index].start_easing(tween);
+        if let Some(tween) = self.tweens.get_mut(layer) {
+            if let Some(layer_def) = self.rig.layers.iter().find(|l| l.name == layer) {
+                if let Some(tween_def) = &layer_def.tween {
+                    tween.start_easing(tween_def);
+                }
             }
         }
     }
 
     pub fn tween_stop_easing(&mut self, layer: &str) {
-        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-            if let Some(tween) = &self.rig.layers[index].tween {
-                self.tweens[index].stop_easing(tween);
+        if let Some(tween) = self.tweens.get_mut(layer) {
+            if let Some(layer_def) = self.rig.layers.iter().find(|l| l.name == layer) {
+                if let Some(tween_def) = &layer_def.tween {
+                    tween.stop_easing(tween_def);
+                }
             }
         }
     }
 
     pub fn tween_pause(&mut self, layer: &str) {
-        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-            self.tweens[index].pause();
+        if let Some(tween) = self.tweens.get_mut(layer) {
+            tween.pause();
         }
     }
 
     pub fn tween_resume(&mut self, layer: &str) {
-        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-            self.tweens[index].resume();
+        if let Some(tween) = self.tweens.get_mut(layer) {
+            tween.resume();
         }
     }
 
     pub fn is_tween_enabled(&mut self, layer: &str) -> bool {
-        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-            self.tweens[index].is_enabled()
-        } else {
-            false
+        if let Some(tween) = self.tweens.get_mut(layer) {
+            return tween.is_enabled();
         }
+        false
     }
 
     pub fn is_tween_paused(&mut self, layer: &str) -> bool {
-        if let Some(index) = self.rig.layers.iter().position(|l| l.name == layer) {
-            self.tweens[index].is_paused()
-        } else {
-            false
+        if let Some(tween) = self.tweens.get_mut(layer) {
+            return tween.is_paused();
         }
+        false
     }
 
     // FX API functions

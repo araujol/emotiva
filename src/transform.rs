@@ -43,7 +43,7 @@ impl Default for WorldTransform {
 /// Resolves world transforms for all layers, accounting for parenting and all transformation sources.
 pub fn resolve_all_transforms(
     rig: &CharRig,
-    tweens: &mut [TweenState],
+    tweens: &mut HashMap<String, TweenState>,
     motions: &HashMap<String, Motion2D>,
     rotations: &HashMap<String, Rotation>,
     fx: &VisualFxState,
@@ -70,7 +70,7 @@ fn resolve_layer_transform(
     name: &str,
     rig: &CharRig,
     cache: &mut HashMap<String, WorldTransform>,
-    tweens: &mut [TweenState],
+    tweens: &mut HashMap<String, TweenState>,
     motions: &HashMap<String, Motion2D>,
     rotations: &HashMap<String, Rotation>,
     fx: &VisualFxState,
@@ -85,13 +85,11 @@ fn resolve_layer_transform(
     let mut tint = [1.0, 1.0, 1.0, 1.0];
 
     // Tween
-    if let Some(index) = rig.layers.iter().position(|l| l.name == layer.name) {
-        if let Some(tween) = &layer.tween {
-            if let Some(state) = tweens.get_mut(index) {
-                let offs = state.value(tween);
-                pos += Vec2::new(offs.dx, offs.dy);
-                rot += offs.rotation;
-            }
+    if let Some(tween_def) = &layer.tween {
+        if let Some(state) = tweens.get_mut(&layer.name) {
+            let offs = state.value(tween_def);
+            pos += Vec2::new(offs.dx, offs.dy);
+            rot += offs.rotation;
         }
     }
 
