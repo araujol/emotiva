@@ -3,12 +3,12 @@
         (
             name: "base",
             image: "fuurin.png",
-            offset: (430.0, 560.0),
-            scale: 0.6,
+            offset: Some((768.0, 512.0)),
+            scale: Some(0.6),
             z_index: 0,
             tween: Some((
-                sway: (200.0, 0.0),
-                lean: Some((max_angle: -10.0)),
+                sway: (100.0, 0.0),
+                lean: Some((max_angle: -5.0)),
                 period: 5.0,
                 easing_start: Some(SineIn),
                 easing_stop: Some(CubicOut),
