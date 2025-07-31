@@ -18,6 +18,7 @@ pub struct ScaleFxKind {
     pub easing: Easing,
     pub elapsed: f32,
     pub finished: bool,
+    pub animation_id: Option<u64>,
 }
 
 #[derive(Clone, Debug)]
@@ -28,6 +29,7 @@ pub struct AlphaFxKind {
     pub easing: Easing,
     pub elapsed: f32,
     pub finished: bool,
+    pub animation_id: Option<u64>,
 }
 
 #[derive(Clone, Debug)]
@@ -38,6 +40,7 @@ pub struct TintFxKind {
     pub easing: Easing,
     pub elapsed: f32,
     pub finished: bool,
+    pub animation_id: Option<u64>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -65,44 +68,75 @@ impl VisualFxState {
         }
     }
 
-    /// Updates all FX objects and reports if any started or finished.
+    /// Updates all FX objects and reports if any started or finished with their IDs.
     pub fn update(&mut self, dt: f32) -> AnimEvent {
         self.time += dt;
         let mut event = AnimEvent::None;
 
-        fn advance(elapsed: &mut f32, duration: f32, finished: &mut bool, dt: f32) -> AnimEvent {
+        fn advance(
+            elapsed: &mut f32,
+            duration: f32,
+            finished: &mut bool,
+            dt: f32,
+            id: Option<u64>,
+        ) -> AnimEvent {
             if !*finished {
+                // First frame logic
+                if *elapsed == 0.0 {
+                    *elapsed += dt;
+                    if *elapsed >= duration {
+                        *elapsed = duration;
+                        *finished = true;
+                        return AnimEvent::Completed(id);
+                    }
+                    return AnimEvent::Started(id);
+                }
+
                 *elapsed += dt;
                 if *elapsed >= duration {
                     *elapsed = duration;
                     *finished = true;
-                    return AnimEvent::Completed;
-                }
-                if *elapsed == 0.0 {
-                    return AnimEvent::Started;
+                    return AnimEvent::Completed(id);
                 }
             }
             AnimEvent::None
         }
 
-        // FIX: Emitted signals should differentiate FX.
         for fx in self.scale_fx.values_mut() {
-            let e = advance(&mut fx.elapsed, fx.duration, &mut fx.finished, dt);
-            if let AnimEvent::Started | AnimEvent::Completed = e {
+            let e = advance(
+                &mut fx.elapsed,
+                fx.duration,
+                &mut fx.finished,
+                dt,
+                fx.animation_id,
+            );
+            if let AnimEvent::Started(_) | AnimEvent::Completed(_) = e {
                 event = e;
             }
         }
 
         for fx in self.alpha_fx.values_mut() {
-            let e = advance(&mut fx.elapsed, fx.duration, &mut fx.finished, dt);
-            if let AnimEvent::Started | AnimEvent::Completed = e {
+            let e = advance(
+                &mut fx.elapsed,
+                fx.duration,
+                &mut fx.finished,
+                dt,
+                fx.animation_id,
+            );
+            if let AnimEvent::Started(_) | AnimEvent::Completed(_) = e {
                 event = e;
             }
         }
 
         for fx in self.tint_fx.values_mut() {
-            let e = advance(&mut fx.elapsed, fx.duration, &mut fx.finished, dt);
-            if let AnimEvent::Started | AnimEvent::Completed = e {
+            let e = advance(
+                &mut fx.elapsed,
+                fx.duration,
+                &mut fx.finished,
+                dt,
+                fx.animation_id,
+            );
+            if let AnimEvent::Started(_) | AnimEvent::Completed(_) = e {
                 event = e;
             }
         }
@@ -177,8 +211,15 @@ impl VisualFxState {
 }
 
 // === FX API Helpers ===
+
 /// Returns a scale animation from one value to another
-pub fn make_scale_fx(from: f32, to: f32, duration: f32, easing: Easing) -> ScaleFxKind {
+pub fn make_scale_fx(
+    from: f32,
+    to: f32,
+    duration: f32,
+    easing: Easing,
+    animation_id: Option<u64>,
+) -> ScaleFxKind {
     ScaleFxKind {
         from,
         to,
@@ -186,11 +227,18 @@ pub fn make_scale_fx(from: f32, to: f32, duration: f32, easing: Easing) -> Scale
         easing,
         elapsed: 0.0,
         finished: false,
+        animation_id,
     }
 }
 
 /// Returns an alpha animation from one value to another
-pub fn make_alpha_fx(from: f32, to: f32, duration: f32, easing: Easing) -> AlphaFxKind {
+pub fn make_alpha_fx(
+    from: f32,
+    to: f32,
+    duration: f32,
+    easing: Easing,
+    animation_id: Option<u64>,
+) -> AlphaFxKind {
     AlphaFxKind {
         from,
         to,
@@ -198,11 +246,18 @@ pub fn make_alpha_fx(from: f32, to: f32, duration: f32, easing: Easing) -> Alpha
         easing,
         elapsed: 0.0,
         finished: false,
+        animation_id,
     }
 }
 
 /// Returns a tint animation from one color to another (RGBA)
-pub fn make_tint_fx(from: [f32; 4], to: [f32; 4], duration: f32, easing: Easing) -> TintFxKind {
+pub fn make_tint_fx(
+    from: [f32; 4],
+    to: [f32; 4],
+    duration: f32,
+    easing: Easing,
+    animation_id: Option<u64>,
+) -> TintFxKind {
     TintFxKind {
         from,
         to,
@@ -210,5 +265,6 @@ pub fn make_tint_fx(from: [f32; 4], to: [f32; 4], duration: f32, easing: Easing)
         easing,
         elapsed: 0.0,
         finished: false,
+        animation_id,
     }
 }

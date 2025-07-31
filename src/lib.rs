@@ -60,6 +60,9 @@ pub struct CharAnimator {
     pub motions: HashMap<String, Motion2D>, // layer name -> motion animation
     pub rotations: HashMap<String, Rotation>,
     pub visual_fx: VisualFxState,
+
+    /// Next animation ID generator
+    pub next_animation_id: u64,
 }
 
 impl CharAnimator {
@@ -120,8 +123,43 @@ impl CharAnimator {
             time: 0.0,
             image_overrides: HashMap::new(),
             visual_fx: VisualFxState::new(),
+            next_animation_id: 1,
         }
     }
+
+    // ================================ ID System ===============================//
+    /// Generate and return the next unique animation ID.
+    pub fn next_id(&mut self) -> u64 {
+        let id = self.next_animation_id;
+        self.next_animation_id += 1;
+        id
+    }
+
+    /// Assign an animation ID to any tween/motion/FX object being started.
+    fn assign_id_to_tween(&mut self, layer: &str) -> u64 {
+        let id = self.next_id();
+        if let Some(tween) = self.tweens.get_mut(layer) {
+            tween.set_animation_id(id);
+        }
+        id
+    }
+
+    fn assign_id_to_motion(&mut self, layer: &str) -> u64 {
+        let id = self.next_id();
+        if let Some(motion) = self.motions.get_mut(layer) {
+            motion.set_animation_id(id);
+        }
+        id
+    }
+
+    fn assign_id_to_rotation(&mut self, layer: &str) -> u64 {
+        let id = self.next_id();
+        if let Some(rotation) = self.rotations.get_mut(layer) {
+            rotation.set_animation_id(id);
+        }
+        id
+    }
+    // =========================================================================//
 
     /// Change a layer's image by name.
     pub fn set_layer(&mut self, layer_name: &str, variant: &str) {
@@ -264,28 +302,36 @@ impl CharAnimator {
     }
 
     // Motion API
-    pub fn motion_play(&mut self, layer: &str) {
+    pub fn motion_play(&mut self, layer: &str) -> u64 {
+        let id = self.assign_id_to_motion(layer);
         if let Some(motion) = self.motions.get_mut(layer) {
-            motion.play();
+            motion.play()
         }
+        id
     }
 
-    pub fn motion_reverse(&mut self, layer: &str) {
+    pub fn motion_reverse(&mut self, layer: &str) -> u64 {
+        let id = self.assign_id_to_motion(layer);
         if let Some(motion) = self.motions.get_mut(layer) {
-            motion.reverse();
+            motion.reverse()
         }
+        id
     }
 
-    pub fn rotation_play(&mut self, layer: &str) {
+    pub fn rotation_play(&mut self, layer: &str) -> u64 {
+        let id = self.assign_id_to_rotation(layer);
         if let Some(rotation) = self.rotations.get_mut(layer) {
-            rotation.play();
+            rotation.play()
         }
+        id
     }
 
-    pub fn rotation_reverse(&mut self, layer: &str) {
+    pub fn rotation_reverse(&mut self, layer: &str) -> u64 {
+        let id = self.assign_id_to_rotation(layer);
         if let Some(rotation) = self.rotations.get_mut(layer) {
-            rotation.reverse();
+            rotation.reverse()
         }
+        id
     }
 
     pub fn is_motion_finished(&mut self, layer: &str) -> bool {
@@ -307,10 +353,12 @@ impl CharAnimator {
     }
 
     // Tween system API
-    pub fn tween_start(&mut self, layer: &str) {
+    pub fn tween_start(&mut self, layer: &str) -> u64 {
+        let id = self.assign_id_to_tween(layer);
         if let Some(tween) = self.tweens.get_mut(layer) {
-            tween.start();
+            tween.start()
         }
+        id
     }
 
     pub fn tween_stop(&mut self, layer: &str) {
@@ -319,7 +367,8 @@ impl CharAnimator {
         }
     }
 
-    pub fn tween_start_easing(&mut self, layer: &str) {
+    pub fn tween_start_easing(&mut self, layer: &str) -> u64 {
+        let id = self.assign_id_to_tween(layer);
         if let Some(tween) = self.tweens.get_mut(layer) {
             if let Some(layer_def) = self.rig.layers.iter().find(|l| l.name == layer) {
                 if let Some(tween_def) = &layer_def.tween {
@@ -327,6 +376,7 @@ impl CharAnimator {
                 }
             }
         }
+        id
     }
 
     pub fn tween_stop_easing(&mut self, layer: &str) {
@@ -366,18 +416,40 @@ impl CharAnimator {
     }
 
     // FX API functions
-    pub fn set_scale(&mut self, layer: &str, from: f32, to: f32, duration: f32, easing: Easing) {
-        self.visual_fx
-            .add_scale_fx(layer, crate::fx::make_scale_fx(from, to, duration, easing));
+    pub fn set_scale(
+        &mut self,
+        layer: &str,
+        from: f32,
+        to: f32,
+        duration: f32,
+        easing: Easing,
+    ) -> u64 {
+        let id = self.next_id();
+        self.visual_fx.add_scale_fx(
+            layer,
+            crate::fx::make_scale_fx(from, to, duration, easing, Some(id)),
+        );
+        id
     }
 
     pub fn remove_scale(&mut self, layer: &str) {
         self.visual_fx.remove_scale_fx(layer);
     }
 
-    pub fn set_alpha(&mut self, layer: &str, from: f32, to: f32, duration: f32, easing: Easing) {
-        self.visual_fx
-            .add_alpha_fx(layer, crate::fx::make_alpha_fx(from, to, duration, easing));
+    pub fn set_alpha(
+        &mut self,
+        layer: &str,
+        from: f32,
+        to: f32,
+        duration: f32,
+        easing: Easing,
+    ) -> u64 {
+        let id = self.next_id();
+        self.visual_fx.add_alpha_fx(
+            layer,
+            crate::fx::make_alpha_fx(from, to, duration, easing, Some(id)),
+        );
+        id
     }
 
     pub fn remove_alpha(&mut self, layer: &str) {
@@ -397,9 +469,13 @@ impl CharAnimator {
         to: [f32; 4],
         duration: f32,
         easing: Easing,
-    ) {
-        self.visual_fx
-            .add_tint_fx(layer, crate::fx::make_tint_fx(from, to, duration, easing));
+    ) -> u64 {
+        let id = self.next_id();
+        self.visual_fx.add_tint_fx(
+            layer,
+            crate::fx::make_tint_fx(from, to, duration, easing, Some(id)),
+        );
+        id
     }
 
     pub fn remove_tint(&mut self, layer: &str) {

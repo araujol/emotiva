@@ -23,6 +23,7 @@ pub struct Motion2D {
     playing: bool,
     direction: Direction,
     easing: Easing,
+    animation_id: Option<u64>, // unique animation identifier
 }
 
 impl Motion2D {
@@ -35,31 +36,25 @@ impl Motion2D {
             playing: false,
             direction: Direction::Forward,
             easing,
+            animation_id: None,
         }
     }
 
-    pub fn play(&mut self) -> AnimEvent {
+    /// Assign an animation ID for this Motion2D.
+    pub fn set_animation_id(&mut self, id: u64) {
+        self.animation_id = Some(id);
+    }
+
+    pub fn play(&mut self) {
         self.elapsed = 0.0;
         self.direction = Direction::Forward;
-        let was_playing = self.playing;
         self.playing = true;
-        if !was_playing {
-            AnimEvent::Started
-        } else {
-            AnimEvent::None
-        }
     }
 
-    pub fn reverse(&mut self) -> AnimEvent {
+    pub fn reverse(&mut self) {
         self.elapsed = 0.0;
         self.direction = Direction::Reverse;
-        let was_playing = self.playing;
         self.playing = true;
-        if !was_playing {
-            AnimEvent::Started
-        } else {
-            AnimEvent::None
-        }
     }
 
     pub fn update(&mut self, dt: f32) -> AnimEvent {
@@ -68,16 +63,16 @@ impl Motion2D {
             return AnimEvent::None;
         }
 
-        // Signal Started for the very first frame after play() or reverse()
+        // First frame logic
         if self.elapsed == 0.0 {
             // Increment time but still return Started this frame.
             self.elapsed += dt;
             if self.elapsed >= self.duration {
                 self.elapsed = self.duration;
                 self.playing = false;
-                return AnimEvent::Completed;
+                return AnimEvent::Completed(self.animation_id);
             }
-            return AnimEvent::Started;
+            return AnimEvent::Started(self.animation_id);
         }
 
         // Continue running.
@@ -86,7 +81,7 @@ impl Motion2D {
         if self.elapsed >= self.duration {
             self.elapsed = self.duration;
             self.playing = false;
-            AnimEvent::Completed
+            AnimEvent::Completed(self.animation_id)
         } else {
             AnimEvent::None
         }
@@ -125,15 +120,20 @@ impl Rotation {
         }
     }
 
+    /// Assign an animation ID for this Rotation's Motion2D.
+    pub fn set_animation_id(&mut self, id: u64) {
+        self.motion.set_animation_id(id);
+    }
+
     pub fn update(&mut self, dt: f32) -> AnimEvent {
         self.motion.update(dt)
     }
 
-    pub fn play(&mut self) -> AnimEvent {
+    pub fn play(&mut self) {
         self.motion.play()
     }
 
-    pub fn reverse(&mut self) -> AnimEvent {
+    pub fn reverse(&mut self) {
         self.motion.reverse()
     }
 

@@ -194,7 +194,7 @@ impl EmotivaQuad {
         duration: f32,
         easing: Easing,
     ) {
-        self.animator.set_tint(layer, from, to, duration, easing)
+        self.animator.set_tint(layer, from, to, duration, easing);
     }
 
     pub fn remove_color(&mut self, layer: &str) {

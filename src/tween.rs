@@ -14,8 +14,10 @@ pub struct TweenState {
     time: f32,
     enabled: bool,
     paused: bool,                               // whether this tween is paused
+    stopped: bool,                              // whether this tween was stopped
     ease_in_state: Option<(f32, TweenOffset)>,  // (progress, target offset)
     ease_out_state: Option<(f32, TweenOffset)>, // (progress, starting offset)
+    animation_id: Option<u64>,                  // unique ID for this tween instance
 }
 
 impl Default for TweenState {
@@ -24,8 +26,10 @@ impl Default for TweenState {
             time: 0.0,
             enabled: false,
             paused: false,
+            stopped: false,
             ease_in_state: None,
             ease_out_state: None,
+            animation_id: None,
         }
     }
 }
@@ -72,66 +76,53 @@ impl TweenState {
         self.paused
     }
 
-    pub fn start(&mut self) -> AnimEvent {
-        let already_enabled = self.enabled;
-        self.enabled = true;
-        self.paused = false;
-        if !already_enabled {
-            AnimEvent::Started
-        } else {
-            AnimEvent::None
-        }
+    pub fn is_stopped(&mut self) -> bool {
+        self.stopped
     }
 
-    pub fn stop(&mut self) -> AnimEvent {
-        let was_enabled = self.enabled || self.ease_in_state.is_some();
+    /// Assign an animation ID to this tween state.
+    pub fn set_animation_id(&mut self, id: u64) {
+        self.animation_id = Some(id);
+    }
+
+    pub fn start(&mut self) {
+        self.enabled = true;
+        self.paused = false;
+        self.stopped = false;
+    }
+
+    pub fn stop(&mut self) {
         self.enabled = false;
         self.paused = false;
+        self.stopped = true;
         self.time = 0.0;
         self.ease_in_state = None;
         self.ease_out_state = None;
-        if was_enabled {
-            AnimEvent::Completed
-        } else {
-            AnimEvent::None
-        }
     }
 
-    pub fn pause(&mut self) -> AnimEvent {
-        let was_paused = self.paused;
+    pub fn pause(&mut self) {
         self.paused = true;
-        if !was_paused {
-            AnimEvent::Paused
-        } else {
-            AnimEvent::None
-        }
     }
 
-    pub fn resume(&mut self) -> AnimEvent {
-        let was_paused = self.paused;
+    pub fn resume(&mut self) {
         self.paused = false;
-        if was_paused {
-            AnimEvent::Resumed
-        } else {
-            AnimEvent::None
-        }
     }
 
-    pub fn start_easing(&mut self, _tween: &Tween) -> AnimEvent {
+    pub fn start_easing(&mut self, _tween: &Tween) {
         self.time = 0.0;
         self.enabled = false; // becomes true after easing
         self.paused = false;
-        self.ease_in_state = Some((0.0, TweenOffset::zero())); // always start from zero
-        AnimEvent::Started
+        self.stopped = false;
+        self.ease_in_state = Some((0.0, TweenOffset::zero()));
     }
 
-    pub fn stop_easing(&mut self, tween: &Tween) -> AnimEvent {
+    pub fn stop_easing(&mut self, tween: &Tween) {
         let current_offset = self.compute_offset(tween);
         self.enabled = false;
         self.paused = false;
+        self.stopped = true;
         self.ease_out_state = Some((0.0, current_offset));
         self.time = 0.0;
-        AnimEvent::Completed
     }
 
     /// Compute current offset for the current time
@@ -156,11 +147,12 @@ impl TweenState {
     /// Only updates internal state (time, easing progression) and returns any AnimEvent.
     pub fn update(&mut self, dt: f32) -> AnimEvent {
         if self.paused {
-            return AnimEvent::Paused;
+            return AnimEvent::Paused(self.animation_id);
         }
 
         let mut event = AnimEvent::None;
 
+        // Handle easing in (start easing)
         if let Some((ref mut start_time, _start_target)) = self.ease_in_state {
             let easing_duration = 1.0;
             *start_time += dt / easing_duration;
@@ -168,17 +160,33 @@ impl TweenState {
             if t >= 1.0 {
                 self.ease_in_state = None;
                 self.enabled = true;
-                event = AnimEvent::Started;
+                event = AnimEvent::Started(self.animation_id);
             }
-        } else if self.enabled {
+        }
+        // Handle normal running state
+        else if self.enabled {
+            // increment normal time progression
+            let was_zero = self.time == 0.0;
             self.time += dt;
-        } else if let Some((ref mut easing_time, _start_offset)) = self.ease_out_state {
+            if was_zero {
+                // mark Started on first tick of normal start
+                event = AnimEvent::Started(self.animation_id);
+            }
+        }
+        // Handle easing out (stop easing)
+        else if let Some((ref mut easing_time, _start_offset)) = self.ease_out_state {
             let easing_duration = 1.0;
             *easing_time += dt / easing_duration;
             let t = (*easing_time).min(1.0);
             if t >= 1.0 {
                 self.ease_out_state = None;
-                event = AnimEvent::Completed;
+                event = AnimEvent::Completed(self.animation_id);
+            }
+        } else {
+            // If we’re not easing in/out, check if we just stopped from normal state
+            if self.stopped {
+                event = AnimEvent::Completed(self.animation_id);
+                self.stopped = false;
             }
         }
 
