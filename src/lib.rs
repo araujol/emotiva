@@ -1,16 +1,26 @@
-//! Emotiva Core - Animation runtime and data structures
+//! ==========================================
+//! 🎭 **EmotivaHeart** – The Beating Heart of Emotiva
+//! ------------------------------------------
+//! This is the *central runtime* of Emotiva — the part that gives life
+//! to every character rig, drives animations, and produces the drawables
+//! you see on screen.
 //!
-//! This library powers expressive 2D character animation for visual novels and games.
-//! It provides a modular system for loading character rigs (.ron format), managing per-layer
-//! motion and expression (e.g. blinking, mouth movement), and outputting drawable sprites
-//! for use in rendering engines like Macroquad.
+//! ✅ **What EmotivaHeart Does:**
+//! - Loads character rigs from `.ron` files (sprites, layers, variants)
+//! - Holds the state for all animation systems (tweens, motions, rotations, FX)
+//! - Updates these systems each frame to keep characters “alive”
+//! - Outputs `DrawableSprite` structs ready for any rendering backend
 //!
-//! Modules:
-//! - `format`: Loader for .ron rig files
-//! - `anim`: Subsystems for procedural body parts behavior
-//! - `quad`: Optional macroquad rendering adapter
+//! ✅ **What EmotivaHeart Doesn’t Do:**
+//! - Doesn’t render directly (frontends like `emotiva-macroquad` handle that)
+//! - Doesn’t expose every helper API itself (see `api/` modules for public API)
 //!
-//! Designed to integrate smoothly with Rusutori and other VN engines.
+//! 📦 **Why the name “Heart”?**
+//! Because this struct isn’t just a “core” — it’s the *heartbeat* of Emotiva.
+//! It pumps movement, expression, and emotion through the entire system.
+//!
+//! Designed to integrate smoothly with **Rusutori** and other visual novel engines.
+//! ==========================================
 
 pub mod anim;
 pub mod easing;
@@ -21,6 +31,8 @@ pub mod motion;
 pub mod quad;
 pub mod transform;
 pub mod tween;
+
+pub mod api;
 
 pub mod palette;
 
@@ -48,8 +60,12 @@ pub struct DrawableSprite {
     pub tint: [f32; 4],
 }
 
-/// The character animator holds time state and generates drawables.
-pub struct CharAnimator {
+/// **EmotivaHeart** – the main runtime struct managing all animation state.
+///
+/// - Owns the loaded `CharRig` (layer data, variants)
+/// - Tracks all tweens, motions, rotations, and FX
+/// - Produces `DrawableSprite`s for rendering each frame
+pub struct EmotivaHeart {
     pub rig: CharRig,
     pub time: f32,
     pub mouth: Option<MouthState>,
@@ -65,7 +81,7 @@ pub struct CharAnimator {
     pub next_animation_id: u64,
 }
 
-impl CharAnimator {
+impl EmotivaHeart {
     pub fn new(rig: CharRig, rng: &mut impl Rng) -> Self {
         let mut tweens = HashMap::new();
         let mut motions = HashMap::new();
@@ -125,62 +141,6 @@ impl CharAnimator {
             visual_fx: VisualFxState::new(),
             next_animation_id: 1,
         }
-    }
-
-    // ================================ ID System ===============================//
-    /// Generate and return the next unique animation ID.
-    pub fn next_id(&mut self) -> u64 {
-        let id = self.next_animation_id;
-        self.next_animation_id += 1;
-        id
-    }
-
-    /// Assign an animation ID to any tween/motion/FX object being started.
-    fn assign_id_to_tween(&mut self, layer: &str) -> u64 {
-        let id = self.next_id();
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            tween.set_animation_id(id);
-        }
-        id
-    }
-
-    fn assign_id_to_motion(&mut self, layer: &str) -> u64 {
-        let id = self.next_id();
-        if let Some(motion) = self.motions.get_mut(layer) {
-            motion.set_animation_id(id);
-        }
-        id
-    }
-
-    fn assign_id_to_rotation(&mut self, layer: &str) -> u64 {
-        let id = self.next_id();
-        if let Some(rotation) = self.rotations.get_mut(layer) {
-            rotation.set_animation_id(id);
-        }
-        id
-    }
-    // =========================================================================//
-
-    /// Change a layer's image by name.
-    pub fn set_layer(&mut self, layer_name: &str, variant: &str) {
-        if let Some(layer_variants) = self.image_variants.get(layer_name) {
-            if let Some(image_name) = layer_variants.get(variant) {
-                self.image_overrides
-                    .insert(layer_name.to_string(), image_name.clone());
-            } else {
-                eprintln!(
-                    "Warning: unknown variant '{}' for layer '{}'",
-                    variant, layer_name
-                );
-            }
-        } else {
-            eprintln!("Warning: layer '{}' has no image variants", layer_name);
-        }
-    }
-
-    /// Reset a layer's image override back to the default.
-    pub fn reset_layer(&mut self, layer_name: &str) {
-        self.image_overrides.remove(layer_name);
     }
 
     /// Advance animation state by delta time (in seconds)
@@ -268,217 +228,37 @@ impl CharAnimator {
         output
     }
 
-    pub fn trigger(&mut self, layer: &str, action: &str) {
-        match (layer, action) {
-            ("eyes", "start_blinking") => {
-                if let Some(eyes) = &mut self.eyes {
-                    eyes.start();
-                }
-            }
-            ("eyes", "stop_blinking") => {
-                if let Some(eyes) = &mut self.eyes {
-                    eyes.stop();
-                }
-            }
-            ("mouth", "start_talking") => {
-                if let Some(mouth) = &mut self.mouth {
-                    mouth.start();
-                }
-            }
-            ("mouth", "stop_talking") => {
-                if let Some(mouth) = &mut self.mouth {
-                    mouth.stop();
-                }
-            }
-            ("mouth", "idle_chat") => {
-                if let Some(mouth) = &mut self.mouth {
-                    mouth.idle_chat();
-                }
-            }
-            _ => {
-                eprintln!("Unknown trigger: {}/{}", layer, action);
-            }
-        }
+    // ================================ ID System ===============================//
+    /// Generate and return the next unique animation ID.
+    pub fn next_id(&mut self) -> u64 {
+        let id = self.next_animation_id;
+        self.next_animation_id += 1;
+        id
     }
 
-    // Motion API
-    pub fn motion_play(&mut self, layer: &str) -> u64 {
-        let id = self.assign_id_to_motion(layer);
+    /// Assign an animation ID to any tween/motion/FX object being started.
+    fn assign_id_to_tween(&mut self, layer: &str) -> u64 {
+        let id = self.next_id();
+        if let Some(tween) = self.tweens.get_mut(layer) {
+            tween.set_animation_id(id);
+        }
+        id
+    }
+
+    fn assign_id_to_motion(&mut self, layer: &str) -> u64 {
+        let id = self.next_id();
         if let Some(motion) = self.motions.get_mut(layer) {
-            motion.play()
+            motion.set_animation_id(id);
         }
         id
     }
 
-    pub fn motion_reverse(&mut self, layer: &str) -> u64 {
-        let id = self.assign_id_to_motion(layer);
-        if let Some(motion) = self.motions.get_mut(layer) {
-            motion.reverse()
-        }
-        id
-    }
-
-    pub fn rotation_play(&mut self, layer: &str) -> u64 {
-        let id = self.assign_id_to_rotation(layer);
+    fn assign_id_to_rotation(&mut self, layer: &str) -> u64 {
+        let id = self.next_id();
         if let Some(rotation) = self.rotations.get_mut(layer) {
-            rotation.play()
+            rotation.set_animation_id(id);
         }
         id
     }
-
-    pub fn rotation_reverse(&mut self, layer: &str) -> u64 {
-        let id = self.assign_id_to_rotation(layer);
-        if let Some(rotation) = self.rotations.get_mut(layer) {
-            rotation.reverse()
-        }
-        id
-    }
-
-    pub fn is_motion_finished(&mut self, layer: &str) -> bool {
-        let motion_done = self
-            .motions
-            .get_mut(layer)
-            .map(|m| m.is_finished())
-            .unwrap_or(true);
-        motion_done
-    }
-
-    pub fn is_rotation_finished(&mut self, layer: &str) -> bool {
-        let rotation_done = self
-            .rotations
-            .get_mut(layer)
-            .map(|r| r.is_finished())
-            .unwrap_or(true);
-        rotation_done
-    }
-
-    // Tween system API
-    pub fn tween_start(&mut self, layer: &str) -> u64 {
-        let id = self.assign_id_to_tween(layer);
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            tween.start()
-        }
-        id
-    }
-
-    pub fn tween_stop(&mut self, layer: &str) {
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            tween.stop();
-        }
-    }
-
-    pub fn tween_start_easing(&mut self, layer: &str) -> u64 {
-        let id = self.assign_id_to_tween(layer);
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            if let Some(layer_def) = self.rig.layers.iter().find(|l| l.name == layer) {
-                if let Some(tween_def) = &layer_def.tween {
-                    tween.start_easing(tween_def);
-                }
-            }
-        }
-        id
-    }
-
-    pub fn tween_stop_easing(&mut self, layer: &str) {
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            if let Some(layer_def) = self.rig.layers.iter().find(|l| l.name == layer) {
-                if let Some(tween_def) = &layer_def.tween {
-                    tween.stop_easing(tween_def);
-                }
-            }
-        }
-    }
-
-    pub fn tween_pause(&mut self, layer: &str) {
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            tween.pause();
-        }
-    }
-
-    pub fn tween_resume(&mut self, layer: &str) {
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            tween.resume();
-        }
-    }
-
-    pub fn is_tween_enabled(&mut self, layer: &str) -> bool {
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            return tween.is_enabled();
-        }
-        false
-    }
-
-    pub fn is_tween_paused(&mut self, layer: &str) -> bool {
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            return tween.is_paused();
-        }
-        false
-    }
-
-    // FX API functions
-    pub fn set_scale(
-        &mut self,
-        layer: &str,
-        from: f32,
-        to: f32,
-        duration: f32,
-        easing: Easing,
-    ) -> u64 {
-        let id = self.next_id();
-        self.visual_fx.add_scale_fx(
-            layer,
-            crate::fx::make_scale_fx(from, to, duration, easing, Some(id)),
-        );
-        id
-    }
-
-    pub fn remove_scale(&mut self, layer: &str) {
-        self.visual_fx.remove_scale_fx(layer);
-    }
-
-    pub fn set_alpha(
-        &mut self,
-        layer: &str,
-        from: f32,
-        to: f32,
-        duration: f32,
-        easing: Easing,
-    ) -> u64 {
-        let id = self.next_id();
-        self.visual_fx.add_alpha_fx(
-            layer,
-            crate::fx::make_alpha_fx(from, to, duration, easing, Some(id)),
-        );
-        id
-    }
-
-    pub fn remove_alpha(&mut self, layer: &str) {
-        self.visual_fx.remove_alpha_fx(layer);
-    }
-
-    // Clear all FX
-    pub fn clear_all_fx(&mut self) {
-        self.visual_fx.clear_all_fx();
-    }
-
-    // Color Tint methods
-    pub fn set_tint(
-        &mut self,
-        layer: &str,
-        from: [f32; 4],
-        to: [f32; 4],
-        duration: f32,
-        easing: Easing,
-    ) -> u64 {
-        let id = self.next_id();
-        self.visual_fx.add_tint_fx(
-            layer,
-            crate::fx::make_tint_fx(from, to, duration, easing, Some(id)),
-        );
-        id
-    }
-
-    pub fn remove_tint(&mut self, layer: &str) {
-        self.visual_fx.remove_tint_fx(layer);
-    }
+    // =========================================================================//
 }

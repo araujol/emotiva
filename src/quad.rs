@@ -13,7 +13,7 @@
 //! This module is intended for use in applications using Macroquad to display expressive,
 //! layered character animations in visual novels and similar 2D experiences.
 
-use crate::CharAnimator;
+use crate::EmotivaHeart;
 use crate::easing::Easing;
 use crate::format::load_rig_from_file;
 
@@ -25,7 +25,7 @@ use std::collections::HashMap;
 use macroquad::prelude::*;
 
 pub struct EmotivaQuad {
-    animator: CharAnimator,
+    pub animator: EmotivaHeart,
     textures: HashMap<String, Texture2D>,
     rng: ThreadRng,
     base_position: Vec2,
@@ -35,7 +35,7 @@ impl EmotivaQuad {
     pub async fn load(path: &str, texture_base_path: &str) -> Self {
         let rig = load_rig_from_file(path).expect("Failed to load .ron rig file");
         let mut rng = rng();
-        let animator = CharAnimator::new(rig, &mut rng);
+        let animator = EmotivaHeart::new(rig, &mut rng);
 
         let mut textures: HashMap<String, Texture2D> = HashMap::new();
 
