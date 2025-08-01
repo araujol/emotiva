@@ -77,10 +77,10 @@ impl EmotivaHeart {
     /// * `layer` - Name of the target layer.
     ///
     /// Returns `true` if the motion is done or the layer has no motion.
-    pub fn is_motion_finished(&mut self, layer: &str) -> bool {
+    pub fn is_motion_finished(&self, layer: &str) -> bool {
         let motion_done = self
             .motions
-            .get_mut(layer)
+            .get(layer)
             .map(|m| m.is_finished())
             .unwrap_or(true);
         motion_done
@@ -91,10 +91,10 @@ impl EmotivaHeart {
     /// * `layer` - Name of the target layer.
     ///
     /// Returns `true` if the rotation is done or the layer has no rotation.
-    pub fn is_rotation_finished(&mut self, layer: &str) -> bool {
+    pub fn is_rotation_finished(&self, layer: &str) -> bool {
         let rotation_done = self
             .rotations
-            .get_mut(layer)
+            .get(layer)
             .map(|r| r.is_finished())
             .unwrap_or(true);
         rotation_done

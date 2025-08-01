@@ -151,16 +151,16 @@ impl EmotivaQuad {
         self.animator.tween_resume(layer);
     }
 
-    pub fn is_tween_enabled(&mut self, layer: &str) -> bool {
+    pub fn is_tween_enabled(&self, layer: &str) -> bool {
         return self.animator.is_tween_enabled(layer);
     }
 
-    pub fn is_tween_paused(&mut self, layer: &str) -> bool {
+    pub fn is_tween_paused(&self, layer: &str) -> bool {
         return self.animator.is_tween_paused(layer);
     }
 
     // Motion system API
-    pub fn is_motion_finished(&mut self, layer: &str) -> bool {
+    pub fn is_motion_finished(&self, layer: &str) -> bool {
         return self.animator.is_motion_finished(layer);
     }
 

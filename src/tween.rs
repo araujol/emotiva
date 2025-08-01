@@ -68,15 +68,15 @@ impl TweenState {
         Self::default()
     }
 
-    pub fn is_enabled(&mut self) -> bool {
+    pub fn is_enabled(&self) -> bool {
         self.enabled
     }
 
-    pub fn is_paused(&mut self) -> bool {
+    pub fn is_paused(&self) -> bool {
         self.paused
     }
 
-    pub fn is_stopped(&mut self) -> bool {
+    pub fn is_stopped(&self) -> bool {
         self.stopped
     }
 

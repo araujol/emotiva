@@ -84,8 +84,8 @@ impl EmotivaHeart {
     /// Checks if the tween on the specified layer is currently **enabled**.
     ///
     /// Returns `true` if the tween is active, otherwise `false`.
-    pub fn is_tween_enabled(&mut self, layer: &str) -> bool {
-        if let Some(tween) = self.tweens.get_mut(layer) {
+    pub fn is_tween_enabled(&self, layer: &str) -> bool {
+        if let Some(tween) = self.tweens.get(layer) {
             return tween.is_enabled();
         }
         false
@@ -94,8 +94,8 @@ impl EmotivaHeart {
     /// Checks if the tween on the specified layer is currently **paused**.
     ///
     /// Returns `true` if paused, otherwise `false`.
-    pub fn is_tween_paused(&mut self, layer: &str) -> bool {
-        if let Some(tween) = self.tweens.get_mut(layer) {
+    pub fn is_tween_paused(&self, layer: &str) -> bool {
+        if let Some(tween) = self.tweens.get(layer) {
             return tween.is_paused();
         }
         false
