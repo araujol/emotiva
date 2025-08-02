@@ -25,7 +25,7 @@ use std::collections::HashMap;
 use macroquad::prelude::*;
 
 pub struct EmotivaQuad {
-    pub animator: EmotivaHeart,
+    heart: EmotivaHeart,
     textures: HashMap<String, Texture2D>,
     rng: ThreadRng,
     base_position: Vec2,
@@ -35,11 +35,11 @@ impl EmotivaQuad {
     pub async fn load(path: &str, texture_base_path: &str) -> Self {
         let rig = load_rig_from_file(path).expect("Failed to load .ron rig file");
         let mut rng = rng();
-        let animator = EmotivaHeart::new(rig, &mut rng);
+        let heart = EmotivaHeart::new(rig, &mut rng);
 
         let mut textures: HashMap<String, Texture2D> = HashMap::new();
 
-        for layer in &animator.rig.layers {
+        for layer in &heart.rig.layers {
             // Load base image
             if !textures.contains_key(&layer.image) {
                 let tex = load_texture(&format!("{}/{}", texture_base_path, layer.image))
@@ -62,7 +62,7 @@ impl EmotivaQuad {
         }
 
         EmotivaQuad {
-            animator,
+            heart,
             textures,
             rng,
             base_position: Vec2::ZERO,
@@ -70,11 +70,11 @@ impl EmotivaQuad {
     }
 
     pub fn update(&mut self, dt: f32) {
-        self.animator.update(dt, &mut self.rng);
+        self.heart.update(dt, &mut self.rng);
     }
 
     pub fn draw(&mut self) {
-        for sprite in self.animator.get_drawables() {
+        for sprite in self.heart.get_drawables() {
             if let Some(tex) = self.textures.get(&sprite.image) {
                 // Adjust position so scaling/rotation happen around the sprite's center.
                 // Subtracting the scaled pivot ensures correct alignment at the intended position.
@@ -107,97 +107,51 @@ impl EmotivaQuad {
         }
     }
 
-    /* ============================
-    | API Methods start from here |
-    ============================ */
+    /* ==============================
+    | Unique API Methods start here |
+    ============================== */
     pub fn set_base_position(&mut self, pos: Vec2) {
         self.base_position = pos;
     }
-
-    pub fn set_image(&mut self, layer_name: &str, variant: &str) {
-        self.animator.set_layer(layer_name, variant);
-    }
-
-    pub fn reset_image(&mut self, layer_name: &str) {
-        self.animator.reset_layer(layer_name);
-    }
-
-    pub fn trigger(&mut self, layer: &str, action: &str) {
-        self.animator.trigger(layer, action);
-    }
-
-    //==== TWEEN API ========//
-    pub fn tween_start(&mut self, layer: &str) {
-        self.animator.tween_start(layer);
-    }
-
-    pub fn tween_stop(&mut self, layer: &str) {
-        self.animator.tween_stop(layer);
-    }
-
-    pub fn tween_start_easing(&mut self, layer: &str) {
-        self.animator.tween_start_easing(layer);
-    }
-
-    pub fn tween_stop_easing(&mut self, layer: &str) {
-        self.animator.tween_stop_easing(layer);
-    }
-
-    pub fn tween_pause(&mut self, layer: &str) {
-        self.animator.tween_pause(layer);
-    }
-
-    pub fn tween_resume(&mut self, layer: &str) {
-        self.animator.tween_resume(layer);
-    }
-
-    pub fn is_tween_enabled(&self, layer: &str) -> bool {
-        return self.animator.is_tween_enabled(layer);
-    }
-
-    pub fn is_tween_paused(&self, layer: &str) -> bool {
-        return self.animator.is_tween_paused(layer);
-    }
-
-    // Motion system API
-    pub fn is_motion_finished(&self, layer: &str) -> bool {
-        return self.animator.is_motion_finished(layer);
-    }
-
-    //=============== FX API ===============//
-    pub fn set_scale(&mut self, layer: &str, min: f32, max: f32, speed: f32, easing: Easing) {
-        self.animator.set_scale(layer, min, max, speed, easing);
-    }
-
-    pub fn remove_scale(&mut self, layer: &str) {
-        self.animator.remove_scale(layer);
-    }
-
-    pub fn set_alpha(&mut self, layer: &str, from: f32, to: f32, speed: f32, easing: Easing) {
-        self.animator.set_alpha(layer, from, to, speed, easing);
-    }
-
-    pub fn remove_alpha(&mut self, layer: &str) {
-        self.animator.remove_alpha(layer);
-    }
-
-    pub fn clear_all_fx(&mut self) {
-        self.animator.clear_all_fx();
-    }
-
-    // Color Tint API
-    pub fn set_color(
-        &mut self,
-        layer: &str,
-        from: [f32; 4],
-        to: [f32; 4],
-        duration: f32,
-        easing: Easing,
-    ) {
-        self.animator.set_tint(layer, from, to, duration, easing);
-    }
-
-    pub fn remove_color(&mut self, layer: &str) {
-        self.animator.remove_tint(layer);
-    }
 }
+
+use crate::{forward_methods, forward_methods_mut};
+
+// Mutable methods
+forward_methods_mut!(EmotivaQuad, heart: EmotivaHeart => {
+    // Anim
+    pub fn trigger(&mut self, layer: &str, action: &str);
+    // Layer
+    pub fn set_layer(&mut self, layer_name: &str, variant: &str);
+    pub fn reset_layer(&mut self, layer_name: &str);
+    // Motion
+    pub fn motion_play(&mut self, layer: &str) -> u64;
+    pub fn motion_reverse(&mut self, layer: &str) -> u64;
+    pub fn rotation_play(&mut self, layer: &str) -> u64;
+    pub fn rotation_reverse(&mut self, layer: &str) -> u64;
+    // Tween
+    pub fn tween_start(&mut self, layer: &str) -> u64;
+    pub fn tween_stop(&mut self, layer: &str);
+    pub fn tween_start_easing(&mut self, layer: &str) -> u64;
+    pub fn tween_stop_easing(&mut self, layer: &str);
+    pub fn tween_pause(&mut self, layer: &str);
+    pub fn tween_resume(&mut self, layer: &str);
+    // FX
+    pub fn set_scale(&mut self, layer: &str, min: f32, max: f32, speed: f32, easing: Easing) -> u64;
+    pub fn remove_scale(&mut self, layer: &str);
+    pub fn set_alpha(&mut self, layer: &str, from: f32, to: f32, speed: f32, easing: Easing) -> u64 ;
+    pub fn remove_alpha(&mut self, layer: &str);
+    pub fn set_tint(&mut self, layer: &str, from: [f32; 4], to: [f32; 4], duration: f32, easing: Easing) -> u64;
+    pub fn remove_tint(&mut self, layer: &str);
+    pub fn clear_all_fx(&mut self);
+});
+
+// Immutable methods
+forward_methods!(EmotivaQuad, heart: EmotivaHeart => {
+    // Motion
+    pub fn is_motion_finished(&self, layer: &str) -> bool;
+    pub fn is_rotation_finished(&self, layer: &str) -> bool;
+    // Tween
+    pub fn is_tween_enabled(&self, layer: &str) -> bool;
+    pub fn is_tween_paused(&self, layer: &str) -> bool;
+});

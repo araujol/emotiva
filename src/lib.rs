@@ -33,6 +33,7 @@ pub mod transform;
 pub mod tween;
 
 pub mod api;
+pub mod macros;
 
 pub mod palette;
 
