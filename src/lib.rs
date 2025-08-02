@@ -48,6 +48,7 @@ use rand::Rng;
 use std::collections::HashMap;
 
 use crate::easing::Easing;
+use crate::events::AnimEvent;
 
 /// The result of a frame update: a layer with absolute transform info.
 #[derive(Debug, Clone)]
@@ -80,6 +81,10 @@ pub struct EmotivaHeart {
 
     /// Next animation ID generator
     pub next_animation_id: u64,
+
+    /// Callback maps keyed by animation ID
+    pub callbacks_on_start: HashMap<u64, Vec<Box<dyn FnOnce(&mut EmotivaHeart)>>>,
+    pub callbacks_on_complete: HashMap<u64, Vec<Box<dyn FnOnce(&mut EmotivaHeart)>>>,
 }
 
 impl EmotivaHeart {
@@ -141,6 +146,8 @@ impl EmotivaHeart {
             image_overrides: HashMap::new(),
             visual_fx: VisualFxState::new(),
             next_animation_id: 1,
+            callbacks_on_start: HashMap::new(),
+            callbacks_on_complete: HashMap::new(),
         }
     }
 
@@ -156,19 +163,31 @@ impl EmotivaHeart {
             eye.update(self.time, rng);
         }
 
+        // collect events from all systems
+        let mut events: Vec<AnimEvent> = Vec::new();
+
         for tween in self.tweens.values_mut() {
-            tween.update(delta_time);
+            let e = tween.update(delta_time);
+            events.push(e);
         }
 
         for motion in self.motions.values_mut() {
-            motion.update(delta_time);
+            let e = motion.update(delta_time);
+            events.push(e);
         }
 
         for rotation in self.rotations.values_mut() {
-            rotation.update(delta_time);
+            let e = rotation.update(delta_time);
+            events.push(e);
         }
 
-        self.visual_fx.update(delta_time);
+        let e = self.visual_fx.update(delta_time);
+        events.push(e);
+
+        // handle events and fire callbacks
+        for event in events {
+            self.handle_event(event);
+        }
     }
 
     /// Returns transformed sprites to render this frame.
@@ -229,7 +248,7 @@ impl EmotivaHeart {
         output
     }
 
-    // ================================ ID System ===============================//
+    // ================================ ID System ==============================//
     /// Generate and return the next unique animation ID.
     pub fn next_id(&mut self) -> u64 {
         let id = self.next_animation_id;
@@ -261,5 +280,45 @@ impl EmotivaHeart {
         }
         id
     }
-    // =========================================================================//
+
+    // ================================ Callbacks API =================================//
+    pub fn register_callback_on_start<F>(&mut self, id: u64, cb: F)
+    where
+        F: FnOnce(&mut EmotivaHeart) + 'static,
+    {
+        self.callbacks_on_start
+            .entry(id)
+            .or_default()
+            .push(Box::new(cb));
+    }
+
+    pub fn register_callback_on_complete<F>(&mut self, id: u64, cb: F)
+    where
+        F: FnOnce(&mut EmotivaHeart) + 'static,
+    {
+        self.callbacks_on_complete
+            .entry(id)
+            .or_default()
+            .push(Box::new(cb));
+    }
+
+    fn handle_event(&mut self, event: AnimEvent) {
+        match event {
+            AnimEvent::Started(Some(id)) => {
+                if let Some(cbs) = self.callbacks_on_start.remove(&id) {
+                    for cb in cbs {
+                        cb(self);
+                    }
+                }
+            }
+            AnimEvent::Completed(Some(id)) => {
+                if let Some(cbs) = self.callbacks_on_complete.remove(&id) {
+                    for cb in cbs {
+                        cb(self);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
 }
