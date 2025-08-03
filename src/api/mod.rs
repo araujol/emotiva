@@ -17,6 +17,7 @@
 // ==========================================
 
 pub mod anim;
+pub mod callback;
 pub mod fx;
 pub mod layer;
 pub mod motion;

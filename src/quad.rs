@@ -107,14 +107,14 @@ impl EmotivaQuad {
         }
     }
 
-    /* ==============================
-    | Unique API Methods start here |
-    ============================== */
+    // =============== EmotivaQuad API Methods =============== //
     pub fn set_base_position(&mut self, pos: Vec2) {
         self.base_position = pos;
     }
 }
 
+// ============= API inherited from EmotivaHeart ============= //
+// Macros used to forward methods from EmotivaHeart to EmotivaQuad API
 use crate::{forward_methods, forward_methods_mut};
 
 // Mutable methods
@@ -155,3 +155,20 @@ forward_methods!(EmotivaQuad, heart: EmotivaHeart => {
     pub fn is_tween_enabled(&self, layer: &str) -> bool;
     pub fn is_tween_paused(&self, layer: &str) -> bool;
 });
+
+// Callback API
+impl EmotivaQuad {
+    pub fn on_start<F>(&mut self, id: u64, cb: F)
+    where
+        F: FnOnce(&mut EmotivaHeart) + 'static,
+    {
+        self.heart.on_start(id, cb);
+    }
+
+    pub fn on_end<F>(&mut self, id: u64, cb: F)
+    where
+        F: FnOnce(&mut EmotivaHeart) + 'static,
+    {
+        self.heart.on_end(id, cb);
+    }
+}
