@@ -23,6 +23,7 @@
 //! ==========================================
 
 pub mod anim;
+pub mod delay;
 pub mod easing;
 pub mod events;
 pub mod format;
@@ -39,6 +40,7 @@ pub mod palette;
 
 use anim::eyes::EyesState;
 use anim::mouth::MouthState;
+use delay::Delay;
 use format::CharRig;
 use fx::VisualFxState;
 use motion::{Motion2D, Rotation};
@@ -78,6 +80,8 @@ pub struct EmotivaHeart {
     pub motions: HashMap<String, Motion2D>, // layer name -> motion animation
     pub rotations: HashMap<String, Rotation>,
     pub visual_fx: VisualFxState,
+    /// Global delays (not tied to layers)
+    pub delays: HashMap<u64, Delay>,
 
     /// Next animation ID generator
     pub next_animation_id: u64,
@@ -145,6 +149,7 @@ impl EmotivaHeart {
             time: 0.0,
             image_overrides: HashMap::new(),
             visual_fx: VisualFxState::new(),
+            delays: HashMap::new(),
             next_animation_id: 1,
             callbacks_on_start: HashMap::new(),
             callbacks_on_complete: HashMap::new(),
@@ -183,6 +188,19 @@ impl EmotivaHeart {
 
         let e = self.visual_fx.update(delta_time);
         events.push(e);
+
+        // tick delays
+        let mut finished_ids = Vec::new();
+        for (_id, delay) in self.delays.iter_mut() {
+            let ev = delay.update(delta_time);
+            events.push(ev);
+            if let AnimEvent::Completed(Some(done_id)) = ev {
+                finished_ids.push(done_id);
+            }
+        }
+        for id in finished_ids {
+            self.delays.remove(&id);
+        }
 
         // handle events and fire callbacks
         for event in events {
@@ -279,6 +297,24 @@ impl EmotivaHeart {
             rotation.set_animation_id(id);
         }
         id
+    }
+
+    // ==================== Delay API ==================== //
+    pub fn set_delay(&mut self, duration: f32) -> u64 {
+        let id = self.next_id();
+        let mut delay = Delay::new(duration);
+        delay.set_animation_id(id);
+        delay.play();
+        self.delays.insert(id, delay);
+        id
+    }
+
+    pub fn on_delay<F>(&mut self, duration: f32, cb: F)
+    where
+        F: FnOnce(&mut EmotivaHeart) + 'static,
+    {
+        let id = self.set_delay(duration);
+        self.register_callback_on_complete(id, cb);
     }
 
     // ================================ Callbacks API =================================//

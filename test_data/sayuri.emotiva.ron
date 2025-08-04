@@ -1,0 +1,62 @@
+(
+    layers: [
+        (
+            name: "base",
+            image: "body.png",
+            offset: Some((768.0, 512.0)),
+            scale: Some(0.8),
+            z_index: 1,
+            tween: Some((
+                sway: (0.0, 1.6),
+                lean: Some((max_angle: -0.1)),
+                period: 3.0,
+                easing_stop: Some(SineIn),
+            )),
+        ),
+        (
+            name: "eyes",
+            image: "eyes_open.png",
+            z_index: 2,
+            parent: Some("base"),
+        ),
+        (
+            name: "eyes",
+            image: "eyes_closed.png",
+            variants: Some({ "delighted": "delighted.png" }),
+            z_index: 2,
+            parent: Some("base"),
+        ),
+        (
+            name: "hair_behind",
+            image: "hair_behind.png",
+            z_index: 0,
+            parent: Some("base"),
+            tween: Some((
+                sway: (1.8, 0.0),
+                period: 3.0,
+                easing_stop: Some(SineIn),
+            )),
+        ),
+        (
+            name: "hair_front",
+            image: "hair_front.png",
+            z_index: 2,
+            parent: Some("base"),
+            tween: Some((
+                sway: (1.6, 0.0),
+                period: 3.0,
+                easing_stop: Some(SineIn),
+            )),
+        ),
+        (
+            name: "mouth",
+            image: "mouth_open.png",
+            z_index: 2,
+            parent: Some("base"),
+            tween: Some((
+                sway: (2.0, 0.0),
+                period: 0.7,
+            )),
+        ),
+    ],
+)

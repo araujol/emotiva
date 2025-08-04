@@ -144,6 +144,8 @@ forward_methods_mut!(EmotivaQuad, heart: EmotivaHeart => {
     pub fn set_tint(&mut self, layer: &str, from: [f32; 4], to: [f32; 4], duration: f32, easing: Easing) -> u64;
     pub fn remove_tint(&mut self, layer: &str);
     pub fn clear_all_fx(&mut self);
+    // Delay
+    pub fn set_delay(&mut self, duration: f32) -> u64;
 });
 
 // Immutable methods
@@ -170,5 +172,12 @@ impl EmotivaQuad {
         F: FnOnce(&mut EmotivaHeart) + 'static,
     {
         self.heart.on_end(id, cb);
+    }
+
+    pub fn on_delay<F>(&mut self, duration: f32, cb: F)
+    where
+        F: FnOnce(&mut EmotivaHeart) + 'static,
+    {
+        self.heart.on_delay(duration, cb);
     }
 }
