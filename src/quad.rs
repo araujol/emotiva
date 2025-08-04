@@ -111,55 +111,9 @@ impl EmotivaQuad {
     pub fn set_base_position(&mut self, pos: Vec2) {
         self.base_position = pos;
     }
-}
 
-// ============= API inherited from EmotivaHeart ============= //
-// Macros used to forward methods from EmotivaHeart to EmotivaQuad API
-use crate::{forward_methods, forward_methods_mut};
-
-// Mutable methods
-forward_methods_mut!(EmotivaQuad, heart: EmotivaHeart => {
-    // Anim
-    pub fn trigger(&mut self, layer: &str, action: &str);
-    // Layer
-    pub fn set_layer(&mut self, layer_name: &str, variant: &str);
-    pub fn reset_layer(&mut self, layer_name: &str);
-    // Motion
-    pub fn motion_play(&mut self, layer: &str) -> u64;
-    pub fn motion_reverse(&mut self, layer: &str) -> u64;
-    pub fn rotation_play(&mut self, layer: &str) -> u64;
-    pub fn rotation_reverse(&mut self, layer: &str) -> u64;
-    // Tween
-    pub fn tween_start(&mut self, layer: &str) -> u64;
-    pub fn tween_stop(&mut self, layer: &str);
-    pub fn tween_start_easing(&mut self, layer: &str) -> u64;
-    pub fn tween_stop_easing(&mut self, layer: &str);
-    pub fn tween_pause(&mut self, layer: &str);
-    pub fn tween_resume(&mut self, layer: &str);
-    // FX
-    pub fn set_scale(&mut self, layer: &str, min: f32, max: f32, speed: f32, easing: Easing) -> u64;
-    pub fn remove_scale(&mut self, layer: &str);
-    pub fn set_alpha(&mut self, layer: &str, from: f32, to: f32, speed: f32, easing: Easing) -> u64 ;
-    pub fn remove_alpha(&mut self, layer: &str);
-    pub fn set_tint(&mut self, layer: &str, from: [f32; 4], to: [f32; 4], duration: f32, easing: Easing) -> u64;
-    pub fn remove_tint(&mut self, layer: &str);
-    pub fn clear_all_fx(&mut self);
-    // Delay
-    pub fn set_delay(&mut self, duration: f32) -> u64;
-});
-
-// Immutable methods
-forward_methods!(EmotivaQuad, heart: EmotivaHeart => {
-    // Motion
-    pub fn is_motion_finished(&self, layer: &str) -> bool;
-    pub fn is_rotation_finished(&self, layer: &str) -> bool;
-    // Tween
-    pub fn is_tween_enabled(&self, layer: &str) -> bool;
-    pub fn is_tween_paused(&self, layer: &str) -> bool;
-});
-
-// Callback API
-impl EmotivaQuad {
+    /* In order for callbacks to be nested, they need to be directly
+    forwarded to the EmotivaHeart type */
     pub fn on_start<F>(&mut self, id: u64, cb: F)
     where
         F: FnOnce(&mut EmotivaHeart) + 'static,
@@ -179,5 +133,51 @@ impl EmotivaQuad {
         F: FnOnce(&mut EmotivaHeart) + 'static,
     {
         self.heart.on_delay(duration, cb);
+    }
+}
+
+// ============= EmmotivaAPI ============= //
+use crate::api::EmotivaAPI;
+// Macros used to forward methods from EmotivaAPI to EmotivaQuad
+use crate::{impl_fns_mut, impl_fns_ref};
+
+impl EmotivaAPI for EmotivaQuad {
+    // Mutable methods
+    impl_fns_mut! {
+        heart => {
+        fn trigger(&mut self, layer: &str, action: &str);
+        fn set_layer(&mut self, layer_name: &str, variant: &str);
+        fn reset_layer(&mut self, layer_name: &str);
+        fn motion_play(&mut self, layer: &str) -> u64;
+        fn motion_reverse(&mut self, layer: &str) -> u64;
+        fn rotation_play(&mut self, layer: &str) -> u64;
+        fn rotation_reverse(&mut self, layer: &str) -> u64;
+        fn tween_start(&mut self, layer: &str) -> u64;
+        fn tween_stop(&mut self, layer: &str);
+        fn tween_start_easing(&mut self, layer: &str) -> u64;
+        fn tween_stop_easing(&mut self, layer: &str);
+        fn tween_pause(&mut self, layer: &str);
+        fn tween_resume(&mut self, layer: &str);
+        fn set_scale(&mut self, layer: &str, min: f32, max: f32, speed: f32, easing: Easing)
+        -> u64;
+        fn remove_scale(&mut self, layer: &str);
+        fn set_alpha(&mut self, layer: &str, from: f32, to: f32, speed: f32, easing: Easing)
+        -> u64;
+        fn remove_alpha(&mut self, layer: &str);
+        fn set_tint(&mut self, layer: &str, from: [f32; 4], to: [f32; 4], duration: f32, easing: Easing) -> u64;
+        fn remove_tint(&mut self, layer: &str);
+        fn clear_all_fx(&mut self);
+        fn set_delay(&mut self, duration: f32) -> u64;
+        }
+    }
+
+    // Immutable methods
+    impl_fns_ref! {
+        heart => {
+        fn is_motion_finished(&self, layer: &str) -> bool;
+        fn is_rotation_finished(&self, layer: &str) -> bool;
+        fn is_tween_enabled(&self, layer: &str) -> bool;
+        fn is_tween_paused(&self, layer: &str) -> bool;
+        }
     }
 }

@@ -1,3 +1,4 @@
+use emotiva::api::EmotivaAPI;
 use emotiva::quad::EmotivaQuad;
 
 use macroquad::prelude::*;

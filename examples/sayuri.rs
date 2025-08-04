@@ -1,3 +1,4 @@
+use emotiva::api::EmotivaAPI;
 use emotiva::easing::Easing;
 use emotiva::quad::EmotivaQuad;
 

@@ -1,80 +1,68 @@
 // src/macros.rs
 
-/// 🏗️ Macro to forward selected methods from an inner field
-/// (e.g. `heart: EmotivaHeart`) to an outer type
-/// (e.g. `EmotivaQuad`).
+/// 🧰 Emotiva Macro Helpers
 ///
-/// ## Why?
-/// Frontends like `EmotivaQuad` or `EmotivaBevy` don’t implement
-/// the animation logic themselves — they forward API calls
-/// to the core `EmotivaHeart` type.
+/// This module provides macros to simplify trait method forwarding
+/// for wrapper types like `EmotivaQuad`, delegating calls to an inner
+/// `EmotivaHeart` instance.
 ///
-/// ## How it works
-/// Expands into a standard `impl` block for `$outer`,
-/// generating wrapper methods that call the same methods on
-/// `$field` (of type `$inner`).
+/// ### Macros:
 ///
-/// ## Supports:
-/// ✅ `&self` methods  
-/// ✅ `&mut self` methods  
-/// ✅ Methods with and without return types
+/// #### `impl_fns_ref!`
+/// Implements multiple `&self` trait methods by forwarding to a named inner field.
 ///
-/// ## Example
+/// #### `impl_fns_mut!`
+/// Implements multiple `&mut self` trait methods by forwarding to a named inner field.
+///
+/// These macros help reduce boilerplate in trait implementations and preserve a clean structure.
+///
+/// ## Example:
 /// ```rust
-/// struct EmotivaHeart;
-/// impl EmotivaHeart {
-///     fn tween(&self, x: i32) { println!("Tween {}", x); }
-///     fn reset(&mut self) { println!("Reset"); }
-/// }
-///
 /// struct EmotivaQuad { heart: EmotivaHeart }
 ///
-/// forward_methods!(EmotivaQuad, heart: EmotivaHeart => {
-///     fn tween(&self, x: i32);
-/// });
+/// impl EmotivaAPI for EmotivaQuad {
+///     impl_fns_ref! {
+///         heart => {
+///             fn get_alpha(&self, layer: &str) -> f32;
+///         }
+///     }
 ///
-///
-/// forward_methods_mut!(EmotivaQuad, heart: EmotivaHeart => {
-///     fn reset(&mut self);
-/// });
-///
-/// fn main() {
-///     let mut quad = EmotivaQuad { heart: EmotivaHeart };
-///     quad.tween(5);   // ✅ calls EmotivaHeart::tween(5)
-///     quad.reset();    // ✅ calls EmotivaHeart::reset()
+///     impl_fns_mut! {
+///         heart => {
+///             fn set_layer(&mut self, layer: &str, variant: &str);
+///         }
+///     }
 /// }
 /// ```
 
+/// 🎯 Implement multiple `&self` trait methods by forwarding to `self`
 #[macro_export]
-macro_rules! forward_methods {
+macro_rules! impl_fns_ref {
     (
-        $outer:ty, $field:ident: $inner:ty => {
-            $( pub fn $name:ident(&self $(, $arg:ident: $arg_ty:ty )* ) $(-> $ret:ty)? ; )*
+        $field:ident => {
+            $( fn $name:ident(&self $(, $arg:ident: $arg_ty:ty )* ) $(-> $ret:ty)? ; )*
         }
     ) => {
-        impl $outer {
-            $(
-                pub fn $name(&self, $($arg: $arg_ty),*) $(-> $ret)? {
-                    self.$field.$name($($arg),*)
-                }
-            )*
-        }
+        $(
+            fn $name(&self, $($arg: $arg_ty),*) $(-> $ret)? {
+                self.$field.$name($($arg),*)
+            }
+        )*
     };
 }
 
+/// 🎯 Implement multiple `&mut self` trait methods by forwarding to an inner field
 #[macro_export]
-macro_rules! forward_methods_mut {
+macro_rules! impl_fns_mut {
     (
-        $outer:ty, $field:ident: $inner:ty => {
-            $( pub fn $name:ident(&mut self $(, $arg:ident: $arg_ty:ty )* ) $(-> $ret:ty)? ; )*
+        $field:ident => {
+            $( fn $name:ident(&mut self $(, $arg:ident: $arg_ty:ty )* ) $(-> $ret:ty)? ; )*
         }
     ) => {
-        impl $outer {
-            $(
-                pub fn $name(&mut self, $($arg: $arg_ty),*) $(-> $ret)? {
-                    self.$field.$name($($arg),*)
-                }
-            )*
-        }
+        $(
+            fn $name(&mut self, $($arg: $arg_ty),*) $(-> $ret)? {
+                self.$field.$name($($arg),*)
+            }
+        )*
     };
 }
