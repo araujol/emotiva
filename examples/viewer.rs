@@ -32,7 +32,7 @@ async fn main() {
         if elapsed >= 5.0 {
             if toggled {
                 if !emotiva.is_tween_enabled("base") {
-                    emotiva.trigger("eyes", "start_blinking");
+                    emotiva.eyes_start();
                     emotiva.trigger("mouth", "idle_chat");
                     emotiva.tween_start("eyes");
                     emotiva.tween_start("mouth");
@@ -44,7 +44,7 @@ async fn main() {
                     emotiva.tween_stop("mouth");
                     emotiva.tween_stop("eyes");
                     emotiva.trigger("mouth", "stop_talking");
-                    emotiva.trigger("eyes", "stop_blinking");
+                    emotiva.eyes_stop();
                     i = 0;
                 }
             }

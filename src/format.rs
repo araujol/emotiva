@@ -103,11 +103,25 @@ pub struct MotionDef {
     pub rotation: Option<f32>,
 }
 
+/// Blinking configuration for characters with animated eyes.
+#[derive(Debug, Clone, Deserialize)]
+pub struct EyesConfig {
+    /// How often blinking can occur (range in seconds)
+    pub interval_range: (f32, f32),
+
+    /// Duration of each blink (in seconds)
+    pub duration: f32,
+}
+
 /// A full character rig, consisting of multiple layers.
 #[derive(Debug, Clone, Deserialize)]
 pub struct CharRig {
     /// All layers in this character, ordered arbitrarily
     pub layers: Vec<CharLayer>,
+
+    /// Optional eye blink animation configuration
+    #[serde(default)]
+    pub eyes: Option<EyesConfig>,
 }
 
 /// Loads a character rig from a `.ron` file path.

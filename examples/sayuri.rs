@@ -35,7 +35,7 @@ async fn main() {
                     // Nested callbacks
                     let id = emotiva.set_alpha("base", 1.0, 0.0, 0.5, Easing::SineIn);
                     emotiva.on_end(id, |emo| {
-                        emo.set_layer("eyes", "delighted");
+                        emo.set_layer("eyes_open", "delighted");
                         let id = emo.set_alpha("base", 0.0, 1.0, 0.5, Easing::SineInOut);
                         emo.on_end(id, |emo| {
                             let id = emo.set_scale("base", 1.0, 1.2, 0.5, Easing::Linear);
@@ -43,9 +43,9 @@ async fn main() {
                                 let id = emo.set_scale("base", 1.2, 1.0, 0.8, Easing::Linear);
                                 emo.on_end(id, |emo| {
                                     emo.on_delay(1.5, |emo| {
-                                        emo.reset_layer("eyes");
-                                        emo.trigger("eyes", "start_blinking");
-                                        emo.trigger("mouth", "idle_chat");
+                                        emo.reset_layer("eyes_open");
+                                        emo.eyes_start();
+                                        emo.trigger("mouth", "start_talking");
                                         emo.tween_start("mouth");
                                         emo.tween_start("hair_front");
                                         emo.tween_start("hair_behind");
@@ -63,7 +63,9 @@ async fn main() {
                     emotiva.tween_stop_easing("hair_front");
                     emotiva.tween_stop("mouth");
                     emotiva.trigger("mouth", "stop_talking");
-                    emotiva.trigger("eyes", "stop_blinking");
+                    emotiva.eyes_stop();
+                    emotiva.eyes_set_blink_interval((4.0, 5.5));
+                    emotiva.eyes_set_blink_duration(2.5);
                     i = 0;
                 }
             }

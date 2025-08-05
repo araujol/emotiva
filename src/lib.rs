@@ -97,12 +97,23 @@ impl EmotivaHeart {
         let mut motions = HashMap::new();
         let mut rotations = HashMap::new();
 
-        let has_mouth = rig.layers.iter().any(|l| l.name.contains("mouth"));
+        // Eyes
         let has_eyes = rig.layers.iter().any(|l| l.name.contains("eyes"));
+        let eyes = if has_eyes {
+            if let Some(cfg) = &rig.eyes {
+                Some(EyesState::with_config(cfg.interval_range, cfg.duration))
+            } else {
+                Some(EyesState::new())
+            }
+        } else {
+            None
+        };
 
+        // Mouth
+        let has_mouth = rig.layers.iter().any(|l| l.name.contains("mouth"));
         let mouth = has_mouth.then(|| MouthState::new(0.0, rng));
-        let eyes = has_eyes.then(|| EyesState::new(0.0, rng));
 
+        // Layers
         for layer in rig.layers.iter() {
             tweens.insert(layer.name.clone(), TweenState::new());
 
@@ -160,16 +171,17 @@ impl EmotivaHeart {
     pub fn update(&mut self, delta_time: f32, rng: &mut impl Rng) {
         self.time += delta_time;
 
+        // collect events from all systems
+        let mut events: Vec<AnimEvent> = Vec::new();
+
+        if let Some(eye) = &mut self.eyes {
+            let e = eye.update(self.time, rng);
+            events.push(e);
+        }
+
         if let Some(mouth) = &mut self.mouth {
             mouth.update(self.time, rng);
         }
-
-        if let Some(eye) = &mut self.eyes {
-            eye.update(self.time, rng);
-        }
-
-        // collect events from all systems
-        let mut events: Vec<AnimEvent> = Vec::new();
 
         for tween in self.tweens.values_mut() {
             let e = tween.update(delta_time);
@@ -275,6 +287,14 @@ impl EmotivaHeart {
     }
 
     /// Assign an animation ID to any tween/motion/FX object being started.
+    fn assign_id_to_eyes(&mut self) -> u64 {
+        let id = self.next_id();
+        if let Some(eyes) = &mut self.eyes {
+            eyes.set_animation_id(id);
+        }
+        id
+    }
+
     fn assign_id_to_tween(&mut self, layer: &str) -> u64 {
         let id = self.next_id();
         if let Some(tween) = self.tweens.get_mut(layer) {

@@ -145,6 +145,10 @@ impl EmotivaAPI for EmotivaQuad {
     // Mutable methods
     impl_fns_mut! {
         heart => {
+        fn eyes_start(&mut self) -> u64;
+        fn eyes_stop(&mut self);
+        fn eyes_set_blink_interval(&mut self, range: (f32, f32));
+        fn eyes_set_blink_duration(&mut self, duration: f32);
         fn trigger(&mut self, layer: &str, action: &str);
         fn set_layer(&mut self, layer_name: &str, variant: &str);
         fn reset_layer(&mut self, layer_name: &str);
@@ -174,6 +178,8 @@ impl EmotivaAPI for EmotivaQuad {
     // Immutable methods
     impl_fns_ref! {
         heart => {
+        fn eyes_is_blinking(&self) -> bool;
+        fn eyes_is_blinking_active(&self) -> bool;
         fn is_motion_finished(&self, layer: &str) -> bool;
         fn is_rotation_finished(&self, layer: &str) -> bool;
         fn is_tween_enabled(&self, layer: &str) -> bool;

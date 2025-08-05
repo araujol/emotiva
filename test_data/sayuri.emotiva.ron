@@ -1,4 +1,8 @@
 (
+    eyes: Some((
+        interval_range: (2.5, 5.0),
+        duration: 0.12,
+    )),
     layers: [
         (
             name: "base",
@@ -14,15 +18,15 @@
             )),
         ),
         (
-            name: "eyes",
+            name: "eyes_open",
             image: "eyes_open.png",
+            variants: Some({ "delighted": "delighted.png" }),
             z_index: 2,
             parent: Some("base"),
         ),
         (
-            name: "eyes",
+            name: "eyes_closed",
             image: "eyes_closed.png",
-            variants: Some({ "delighted": "delighted.png" }),
             z_index: 2,
             parent: Some("base"),
         ),
