@@ -147,8 +147,8 @@ impl EmotivaAPI for EmotivaQuad {
         heart => {
         fn eyes_start(&mut self) -> u64;
         fn eyes_stop(&mut self);
-        fn eyes_set_blink_interval(&mut self, range: (f32, f32));
         fn eyes_set_blink_duration(&mut self, duration: f32);
+        fn eyes_set_blink_interval_range(&mut self, range: (f32, f32));
         fn mouth_start(&mut self) -> u64;
         fn mouth_stop(&mut self);
         fn mouth_set_talk_interval(&mut self, interval: f32);
@@ -183,7 +183,7 @@ impl EmotivaAPI for EmotivaQuad {
     impl_fns_ref! {
         heart => {
         fn eyes_is_blinking(&self) -> bool;
-        fn eyes_is_blinking_active(&self) -> bool;
+        fn eyes_is_blinking_enabled(&self) -> bool;
         fn mouth_is_talking(&self) -> bool;
         fn mouth_is_talking_enabled(&self) -> bool;
         fn is_motion_finished(&self, layer: &str) -> bool;

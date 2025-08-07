@@ -107,10 +107,10 @@ pub struct MotionDef {
 #[derive(Debug, Clone, Deserialize)]
 pub struct EyesConfig {
     /// How often blinking can occur (range in seconds)
-    pub interval_range: (f32, f32),
+    pub blink_interval_range: (f32, f32),
 
     /// Duration of each blink (in seconds)
-    pub duration: f32,
+    pub blink_duration: f32,
 }
 
 /// Talking configuration for characters with animated mouths.

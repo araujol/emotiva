@@ -101,7 +101,10 @@ impl EmotivaHeart {
         let has_eyes = rig.layers.iter().any(|l| l.name.contains("eyes"));
         let eyes = if has_eyes {
             if let Some(cfg) = &rig.eyes {
-                Some(EyesState::with_config(cfg.interval_range, cfg.duration))
+                Some(EyesState::with_config(
+                    cfg.blink_duration,
+                    cfg.blink_interval_range,
+                ))
             } else {
                 Some(EyesState::new())
             }

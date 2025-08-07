@@ -25,21 +25,18 @@ impl EyesState {
         Self {
             next_blink_time: 0.0,
             blink_duration: 0.12, // Change this value to modify how long a blink lasts
+            blink_interval_range: interval_range,
             blinking: false,
             blinking_enabled: false,
-            blink_interval_range: interval_range,
             animation_id: None,
         }
     }
 
-    pub fn with_config(interval_range: (f32, f32), duration: f32) -> Self {
+    pub fn with_config(blink_duration: f32, blink_interval_range: (f32, f32)) -> Self {
         Self {
-            next_blink_time: 0.0,
-            blink_duration: duration,
-            blinking: false,
-            blinking_enabled: false,
-            blink_interval_range: interval_range,
-            animation_id: None,
+            blink_duration: blink_duration,
+            blink_interval_range: blink_interval_range,
+            ..Self::new()
         }
     }
 
@@ -77,7 +74,7 @@ impl EyesState {
         self.blinking
     }
 
-    pub fn is_blinking_active(&self) -> bool {
+    pub fn is_blinking_enabled(&self) -> bool {
         self.blinking_enabled
     }
 

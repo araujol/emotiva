@@ -72,8 +72,8 @@ async fn main() {
                     emotiva.mouth_stop();
                     emotiva.eyes_stop();
                     // Change eyes settings.
-                    emotiva.eyes_set_blink_interval((2.0, 4.0));
                     emotiva.eyes_set_blink_duration(1.0);
+                    emotiva.eyes_set_blink_interval_range((2.0, 4.0));
                     // Change talk settins.
                     emotiva.mouth_set_talk_interval(1.0);
                     emotiva.mouth_set_talk_duration(1.2);

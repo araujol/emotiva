@@ -29,18 +29,18 @@ use crate::easing::Easing;
 pub trait EmotivaAPI {
     // Eyes
     fn eyes_is_blinking(&self) -> bool;
-    fn eyes_is_blinking_active(&self) -> bool;
+    fn eyes_is_blinking_enabled(&self) -> bool;
     fn eyes_start(&mut self) -> u64;
     fn eyes_stop(&mut self);
-    fn eyes_set_blink_interval(&mut self, range: (f32, f32));
     fn eyes_set_blink_duration(&mut self, duration: f32);
+    fn eyes_set_blink_interval_range(&mut self, range: (f32, f32));
     // Mouth
     fn mouth_is_talking(&self) -> bool;
     fn mouth_is_talking_enabled(&self) -> bool;
     fn mouth_start(&mut self) -> u64;
     fn mouth_stop(&mut self);
-    fn mouth_set_talk_interval(&mut self, interval: f32);
     fn mouth_set_talk_duration(&mut self, duration: f32);
+    fn mouth_set_talk_interval(&mut self, interval: f32);
     fn mouth_set_flap_open_time(&mut self, duration: f32);
     // Layer
     fn set_layer(&mut self, layer_name: &str, variant: &str);

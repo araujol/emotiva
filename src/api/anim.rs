@@ -57,10 +57,10 @@ impl EmotivaHeart {
     ///
     /// This can be used to determine if a blink session is in progress,
     /// regardless of whether the eyes are currently open or closed.
-    pub fn eyes_is_blinking_active(&self) -> bool {
+    pub fn eyes_is_blinking_enabled(&self) -> bool {
         self.eyes
             .as_ref()
-            .map(|eyes| eyes.is_blinking_active())
+            .map(|eyes| eyes.is_blinking_enabled())
             .unwrap_or(false)
     }
 
@@ -68,7 +68,7 @@ impl EmotivaHeart {
     ///
     /// * `range` - A tuple of `(min, max)` in seconds specifying how often blinks occur.
     ///             For example, `(2.0, 5.0)` causes a blink every 2–5 seconds.
-    pub fn eyes_set_blink_interval(&mut self, range: (f32, f32)) {
+    pub fn eyes_set_blink_interval_range(&mut self, range: (f32, f32)) {
         if let Some(eyes) = &mut self.eyes {
             eyes.set_interval_range(range);
         }
