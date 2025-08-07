@@ -36,20 +36,27 @@ async fn main() {
                     let id = emotiva.set_alpha("base", 1.0, 0.0, 0.5, Easing::SineIn);
                     emotiva.on_end(id, |emo| {
                         emo.set_layer("eyes_open", "delighted");
+                        emo.set_layer("mouth_closed", "nothing"); // temporarily hide closed mouth
                         let id = emo.set_alpha("base", 0.0, 1.0, 0.5, Easing::SineInOut);
                         emo.on_end(id, |emo| {
-                            let id = emo.set_scale("base", 1.0, 1.2, 0.5, Easing::Linear);
+                            let id = emo.set_scale("base", 1.0, 1.2, 0.8, Easing::Linear);
+                            emo.motion_play("base");
                             emo.on_end(id, |emo| {
                                 let id = emo.set_scale("base", 1.2, 1.0, 0.8, Easing::Linear);
+                                emo.motion_reverse("base");
                                 emo.on_end(id, |emo| {
                                     emo.on_delay(1.5, |emo| {
                                         emo.reset_layer("eyes_open");
-                                        emo.eyes_start();
-                                        emo.trigger("mouth", "start_talking");
-                                        emo.tween_start("mouth");
-                                        emo.tween_start("hair_front");
-                                        emo.tween_start("hair_behind");
-                                        emo.tween_start("base");
+                                        emo.reset_layer("mouth_closed");
+                                        // brief delay before start talking
+                                        emo.on_delay(0.5, |emo| {
+                                            emo.eyes_start();
+                                            emo.mouth_start();
+                                            emo.tween_start("mouth_open");
+                                            emo.tween_start("hair_front");
+                                            emo.tween_start("hair_behind");
+                                            emo.tween_start("base");
+                                        });
                                     });
                                 });
                             });
@@ -57,15 +64,21 @@ async fn main() {
                     });
                 }
             } else {
-                if i >= 10 {
+                if i >= 5 {
                     emotiva.tween_stop_easing("base");
                     emotiva.tween_stop_easing("hair_behind");
                     emotiva.tween_stop_easing("hair_front");
-                    emotiva.tween_stop("mouth");
-                    emotiva.trigger("mouth", "stop_talking");
+                    emotiva.tween_stop("mouth_open");
+                    emotiva.mouth_stop();
                     emotiva.eyes_stop();
-                    emotiva.eyes_set_blink_interval((4.0, 5.5));
-                    emotiva.eyes_set_blink_duration(2.5);
+                    // Change eyes settings.
+                    emotiva.eyes_set_blink_interval((2.0, 4.0));
+                    emotiva.eyes_set_blink_duration(1.0);
+                    // Change talk settins.
+                    emotiva.mouth_set_talk_interval(1.0);
+                    emotiva.mouth_set_talk_duration(1.2);
+                    emotiva.mouth_set_flap_open_time(0.2);
+
                     i = 0;
                 }
             }

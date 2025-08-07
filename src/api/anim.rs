@@ -5,15 +5,15 @@
 // **character behavior animations** in Emotiva.
 //
 // ✅ Responsibilities:
-//  - Provide a simple trigger-based interface for
-//    common animations (blinking, talking, idle chat)
+//  - Provide a simple API for common animations (blinking, talking)
 //  - Dispatch actions to eyes and mouth animation subsystems
-//  - Handle unknown triggers gracefully with debug output
 //
 // 📦 Usage:
-// These methods allow frontends to issue simple text-based
-// animation commands (e.g. "start_blinking", "stop_talking")
-// without manually controlling lower-level animation state.
+// These methods allow frontends to access the animation API.
+//
+// ✨ Currently implemented:
+//  - Eyes API: blinking animations with duration and interval
+//  - Mouth API: talking animations with configurable flap rhythm
 // ==========================================
 
 use crate::EmotivaHeart;
@@ -84,35 +84,73 @@ impl EmotivaHeart {
         }
     }
 
-    /// Triggers a predefined **animation action** on a specified layer.
+    // ================= Mouth API =================
+
+    /// Starts the automatic talking animation loop.
     ///
-    /// # Parameters
-    /// - `layer`: The target layer name (e.g. "eyes" or "mouth").
-    /// - `action`: The action to perform (e.g. "start_blinking", "stop_talking", "idle_chat").
+    /// This enables repeated mouth flaps for the configured talk duration.
+    /// Returns a unique mouth ID for tracking.
+    pub fn mouth_start(&mut self) -> u64 {
+        let id = self.assign_id_to_mouth();
+        if let Some(mouth) = &mut self.mouth {
+            mouth.start();
+        }
+        id
+    }
+
+    /// Stops the talking animation loop.
     ///
-    /// # Behavior
-    /// - If the layer and action are known, the corresponding animation method is called.
-    /// - If the layer/action combination is unknown, an error message is printed to stderr.
-    pub fn trigger(&mut self, layer: &str, action: &str) {
-        match (layer, action) {
-            ("mouth", "start_talking") => {
-                if let Some(mouth) = &mut self.mouth {
-                    mouth.start();
-                }
-            }
-            ("mouth", "stop_talking") => {
-                if let Some(mouth) = &mut self.mouth {
-                    mouth.stop();
-                }
-            }
-            ("mouth", "idle_chat") => {
-                if let Some(mouth) = &mut self.mouth {
-                    mouth.idle_chat();
-                }
-            }
-            _ => {
-                eprintln!("Unknown trigger: {}/{}", layer, action);
-            }
+    /// This immediately disables mouth flaps and resets the mouth to idle state.
+    pub fn mouth_stop(&mut self) {
+        if let Some(mouth) = &mut self.mouth {
+            mouth.stop();
+        }
+    }
+
+    /// Returns `true` if the mouth is currently flapping open.
+    ///
+    /// This can be used to detect if a flap is actively in progress.
+    pub fn mouth_is_talking(&self) -> bool {
+        self.mouth
+            .as_ref()
+            .map(|mouth| mouth.is_talking())
+            .unwrap_or(false)
+    }
+
+    /// Returns `true` if a talk session is currently active.
+    ///
+    /// This indicates that the mouth is in a state where flaps are allowed to trigger.
+    pub fn mouth_is_talking_enabled(&self) -> bool {
+        self.mouth
+            .as_ref()
+            .map(|mouth| mouth.is_talking_enabled())
+            .unwrap_or(false)
+    }
+
+    /// Sets how often talk sessions can occur.
+    ///
+    /// * `interval` - Delay in seconds between talk sessions.
+    pub fn mouth_set_talk_interval(&mut self, interval: f32) {
+        if let Some(mouth) = &mut self.mouth {
+            mouth.set_talk_interval(interval);
+        }
+    }
+
+    /// Sets how long each talk session lasts.
+    ///
+    /// * `duration` - Total time in seconds that mouth flaps continue once started.
+    pub fn mouth_set_talk_duration(&mut self, duration: f32) {
+        if let Some(mouth) = &mut self.mouth {
+            mouth.set_talk_duration(duration);
+        }
+    }
+
+    /// Sets how long the mouth stays open during each flap.
+    ///
+    /// * `duration` - Seconds the mouth remains open before closing again.
+    pub fn mouth_set_flap_open_time(&mut self, duration: f32) {
+        if let Some(mouth) = &mut self.mouth {
+            mouth.set_flap_open_time(duration);
         }
     }
 }

@@ -92,7 +92,7 @@ pub struct EmotivaHeart {
 }
 
 impl EmotivaHeart {
-    pub fn new(rig: CharRig, rng: &mut impl Rng) -> Self {
+    pub fn new(rig: CharRig) -> Self {
         let mut tweens = HashMap::new();
         let mut motions = HashMap::new();
         let mut rotations = HashMap::new();
@@ -111,7 +111,19 @@ impl EmotivaHeart {
 
         // Mouth
         let has_mouth = rig.layers.iter().any(|l| l.name.contains("mouth"));
-        let mouth = has_mouth.then(|| MouthState::new(0.0, rng));
+        let mouth = if has_mouth {
+            if let Some(cfg) = &rig.mouth {
+                Some(MouthState::with_config(
+                    cfg.talk_duration,
+                    cfg.talk_interval,
+                    cfg.flap_time,
+                ))
+            } else {
+                Some(MouthState::new())
+            }
+        } else {
+            None
+        };
 
         // Layers
         for layer in rig.layers.iter() {
@@ -180,7 +192,8 @@ impl EmotivaHeart {
         }
 
         if let Some(mouth) = &mut self.mouth {
-            mouth.update(self.time, rng);
+            let e = mouth.update(self.time, rng);
+            events.push(e);
         }
 
         for tween in self.tweens.values_mut() {
@@ -291,6 +304,14 @@ impl EmotivaHeart {
         let id = self.next_id();
         if let Some(eyes) = &mut self.eyes {
             eyes.set_animation_id(id);
+        }
+        id
+    }
+
+    fn assign_id_to_mouth(&mut self) -> u64 {
+        let id = self.next_id();
+        if let Some(mouth) = &mut self.mouth {
+            mouth.set_animation_id(id);
         }
         id
     }

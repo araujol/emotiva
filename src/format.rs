@@ -113,6 +113,19 @@ pub struct EyesConfig {
     pub duration: f32,
 }
 
+/// Talking configuration for characters with animated mouths.
+#[derive(Debug, Clone, Deserialize)]
+pub struct MouthConfig {
+    /// How long each talk session lasts (in seconds)
+    pub talk_duration: f32,
+
+    /// How long to wait before the next talk session starts
+    pub talk_interval: f32,
+
+    /// How long the mouth stays open and closed (in seconds)
+    pub flap_time: f32,
+}
+
 /// A full character rig, consisting of multiple layers.
 #[derive(Debug, Clone, Deserialize)]
 pub struct CharRig {
@@ -122,6 +135,10 @@ pub struct CharRig {
     /// Optional eye blink animation configuration
     #[serde(default)]
     pub eyes: Option<EyesConfig>,
+
+    /// Optional mouth talking animation configuration
+    #[serde(default)]
+    pub mouth: Option<MouthConfig>,
 }
 
 /// Loads a character rig from a `.ron` file path.

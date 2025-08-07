@@ -1,8 +1,10 @@
 (
+    // Animation values
     eyes: Some((
         interval_range: (2.5, 5.0),
         duration: 0.12,
     )),
+    // Sprite layers
     layers: [
         (
             name: "base",
@@ -13,6 +15,32 @@
             tween: Some((
                 sway: (0.0, 1.6),
                 lean: Some((max_angle: -0.1)),
+                period: 3.0,
+                easing_stop: Some(SineIn),
+            )),
+            motion: Some((
+                target: (0.0, -140.0),
+                duration: 0.8,
+            )),
+        ),
+        (
+            name: "hair_behind",
+            image: "hair_behind.png",
+            z_index: 0,
+            parent: Some("base"),
+            tween: Some((
+                sway: (1.8, 0.0),
+                period: 3.0,
+                easing_stop: Some(SineIn),
+            )),
+        ),
+        (
+            name: "hair_front",
+            image: "hair_front.png",
+            z_index: 3,
+            parent: Some("base"),
+            tween: Some((
+                sway: (1.6, 0.0),
                 period: 3.0,
                 easing_stop: Some(SineIn),
             )),
@@ -31,29 +59,7 @@
             parent: Some("base"),
         ),
         (
-            name: "hair_behind",
-            image: "hair_behind.png",
-            z_index: 0,
-            parent: Some("base"),
-            tween: Some((
-                sway: (1.8, 0.0),
-                period: 3.0,
-                easing_stop: Some(SineIn),
-            )),
-        ),
-        (
-            name: "hair_front",
-            image: "hair_front.png",
-            z_index: 2,
-            parent: Some("base"),
-            tween: Some((
-                sway: (1.6, 0.0),
-                period: 3.0,
-                easing_stop: Some(SineIn),
-            )),
-        ),
-        (
-            name: "mouth",
+            name: "mouth_open",
             image: "mouth_open.png",
             z_index: 2,
             parent: Some("base"),
@@ -61,6 +67,13 @@
                 sway: (2.0, 0.0),
                 period: 0.7,
             )),
+        ),
+        (
+            name: "mouth_closed",
+            image: "mouth_closed.png",
+            variants: Some({ "nothing": "nothing.png" }),
+            z_index: 2,
+            parent: Some("base"),
         ),
     ],
 )

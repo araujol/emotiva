@@ -34,8 +34,8 @@ pub struct EmotivaQuad {
 impl EmotivaQuad {
     pub async fn load(path: &str, texture_base_path: &str) -> Self {
         let rig = load_rig_from_file(path).expect("Failed to load .ron rig file");
-        let mut rng = rng();
-        let heart = EmotivaHeart::new(rig, &mut rng);
+        let rng = rng();
+        let heart = EmotivaHeart::new(rig);
 
         let mut textures: HashMap<String, Texture2D> = HashMap::new();
 
@@ -149,7 +149,11 @@ impl EmotivaAPI for EmotivaQuad {
         fn eyes_stop(&mut self);
         fn eyes_set_blink_interval(&mut self, range: (f32, f32));
         fn eyes_set_blink_duration(&mut self, duration: f32);
-        fn trigger(&mut self, layer: &str, action: &str);
+        fn mouth_start(&mut self) -> u64;
+        fn mouth_stop(&mut self);
+        fn mouth_set_talk_interval(&mut self, interval: f32);
+        fn mouth_set_talk_duration(&mut self, duration: f32);
+        fn mouth_set_flap_open_time(&mut self, duration: f32);
         fn set_layer(&mut self, layer_name: &str, variant: &str);
         fn reset_layer(&mut self, layer_name: &str);
         fn motion_play(&mut self, layer: &str) -> u64;
@@ -180,6 +184,8 @@ impl EmotivaAPI for EmotivaQuad {
         heart => {
         fn eyes_is_blinking(&self) -> bool;
         fn eyes_is_blinking_active(&self) -> bool;
+        fn mouth_is_talking(&self) -> bool;
+        fn mouth_is_talking_enabled(&self) -> bool;
         fn is_motion_finished(&self, layer: &str) -> bool;
         fn is_rotation_finished(&self, layer: &str) -> bool;
         fn is_tween_enabled(&self, layer: &str) -> bool;
