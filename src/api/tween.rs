@@ -10,7 +10,7 @@
 //  - Query tween state (enabled, paused)
 //
 // 📦 Usage:
-// These functions are methods on EmotivaCore and
+// These functions are methods on EmotivaHeart and
 // provide a clean way for frontends to manipulate
 // character part animations (e.g. breathing, idle)
 // without directly touching internal tween structs.
@@ -23,13 +23,18 @@ impl EmotivaHeart {
     ///
     /// * `layer` - The name of the layer to tween.
     ///
-    /// Returns a unique tween ID for tracking.
-    pub fn tween_start(&mut self, layer: &str) -> u64 {
-        let id = self.assign_id_to_tween(layer);
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            tween.start()
+    /// Returns an animation ID as Some(ID) for tracking if it suceeds, or None
+    /// if it failed.
+    pub fn tween_start(&mut self, layer: &str) -> Option<u64> {
+        if self.tweens.contains_key(layer) {
+            let id = self.next_id();
+            if let Some(tween) = self.tweens.get_mut(layer) {
+                tween.set_animation_id(id);
+                tween.start();
+                return Some(id);
+            }
         }
-        id
+        None
     }
 
     /// Stops any running **tween** on the specified layer immediately.
@@ -43,17 +48,18 @@ impl EmotivaHeart {
     ///
     /// * `layer` - The name of the layer to tween.
     ///
-    /// Returns a unique tween ID for tracking.
-    pub fn tween_start_easing(&mut self, layer: &str) -> u64 {
-        let id = self.assign_id_to_tween(layer);
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            if let Some(layer_def) = self.rig.layers.iter().find(|l| l.name == layer) {
-                if let Some(tween_def) = &layer_def.tween {
-                    tween.start_easing(tween_def);
-                }
+    /// Returns an animation ID as Some(ID) for tracking if it suceeds, or None
+    /// if it failed.
+    pub fn tween_start_easing(&mut self, layer: &str) -> Option<u64> {
+        if self.tweens.contains_key(layer) {
+            let id = self.next_id();
+            if let Some(tween) = self.tweens.get_mut(layer) {
+                tween.set_animation_id(id);
+                tween.start_easing();
+                return Some(id);
             }
         }
-        id
+        None
     }
 
     /// Stops a **tween** with easing values defined in the `.ron` rig file.

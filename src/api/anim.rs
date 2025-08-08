@@ -25,13 +25,18 @@ impl EmotivaHeart {
     ///
     /// This enables periodic eye blinking for the active character.
     ///
-    /// Returns a unique eyes ID for tracking.
-    pub fn eyes_start(&mut self) -> u64 {
-        let id = self.assign_id_to_eyes();
-        if let Some(eyes) = &mut self.eyes {
-            eyes.start();
+    /// Returns an animation ID as Some(ID) for tracking if it suceeds, or None
+    /// if it failed.
+    pub fn eyes_start(&mut self) -> Option<u64> {
+        if self.eyes.is_some() {
+            let id = self.next_id();
+            if let Some(eyes) = &mut self.eyes {
+                eyes.set_animation_id(id);
+                eyes.start();
+                return Some(id);
+            }
         }
-        id
+        None
     }
 
     /// Stops the automatic blinking animation loop.
@@ -89,13 +94,18 @@ impl EmotivaHeart {
     /// Starts the automatic talking animation loop.
     ///
     /// This enables repeated mouth flaps for the configured talk duration.
-    /// Returns a unique mouth ID for tracking.
-    pub fn mouth_start(&mut self) -> u64 {
-        let id = self.assign_id_to_mouth();
-        if let Some(mouth) = &mut self.mouth {
-            mouth.start();
+    /// Returns an animation ID as Some(ID) for tracking if it suceeds, or None
+    /// if it failed.
+    pub fn mouth_start(&mut self) -> Option<u64> {
+        if self.mouth.is_some() {
+            let id = self.next_id();
+            if let Some(mouth) = &mut self.mouth {
+                mouth.set_animation_id(id);
+                mouth.start();
+                return Some(id);
+            }
         }
-        id
+        None
     }
 
     /// Stops the talking animation loop.

@@ -145,32 +145,30 @@ impl EmotivaAPI for EmotivaQuad {
     // Mutable methods
     impl_fns_mut! {
         heart => {
-        fn eyes_start(&mut self) -> u64;
+        fn eyes_start(&mut self) -> Option<u64>;
         fn eyes_stop(&mut self);
         fn eyes_set_blink_duration(&mut self, duration: f32);
         fn eyes_set_blink_interval_range(&mut self, range: (f32, f32));
-        fn mouth_start(&mut self) -> u64;
+        fn mouth_start(&mut self) -> Option<u64>;
         fn mouth_stop(&mut self);
         fn mouth_set_talk_interval(&mut self, interval: f32);
         fn mouth_set_talk_duration(&mut self, duration: f32);
         fn mouth_set_flap_open_time(&mut self, duration: f32);
         fn set_layer(&mut self, layer_name: &str, variant: &str);
         fn reset_layer(&mut self, layer_name: &str);
-        fn motion_play(&mut self, layer: &str) -> u64;
-        fn motion_reverse(&mut self, layer: &str) -> u64;
-        fn rotation_play(&mut self, layer: &str) -> u64;
-        fn rotation_reverse(&mut self, layer: &str) -> u64;
-        fn tween_start(&mut self, layer: &str) -> u64;
+        fn motion_play(&mut self, layer: &str) -> Option<u64>;
+        fn motion_reverse(&mut self, layer: &str) -> Option<u64>;
+        fn rotation_play(&mut self, layer: &str) -> Option<u64>;
+        fn rotation_reverse(&mut self, layer: &str) -> Option<u64>;
+        fn tween_start(&mut self, layer: &str) -> Option<u64>;
         fn tween_stop(&mut self, layer: &str);
-        fn tween_start_easing(&mut self, layer: &str) -> u64;
+        fn tween_start_easing(&mut self, layer: &str) -> Option<u64>;
         fn tween_stop_easing(&mut self, layer: &str);
         fn tween_pause(&mut self, layer: &str);
         fn tween_resume(&mut self, layer: &str);
-        fn set_scale(&mut self, layer: &str, min: f32, max: f32, speed: f32, easing: Easing)
-        -> u64;
+        fn set_scale(&mut self, layer: &str, min: f32, max: f32, speed: f32, easing: Easing) -> u64;
         fn remove_scale(&mut self, layer: &str);
-        fn set_alpha(&mut self, layer: &str, from: f32, to: f32, speed: f32, easing: Easing)
-        -> u64;
+        fn set_alpha(&mut self, layer: &str, from: f32, to: f32, speed: f32, easing: Easing) -> u64;
         fn remove_alpha(&mut self, layer: &str);
         fn set_tint(&mut self, layer: &str, from: [f32; 4], to: [f32; 4], duration: f32, easing: Easing) -> u64;
         fn remove_tint(&mut self, layer: &str);

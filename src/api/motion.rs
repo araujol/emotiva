@@ -11,7 +11,7 @@
 //  - Query whether motion or rotation has finished
 //
 // 📦 Usage:
-// These API methods are attached to EmotivaCore,
+// These API methods are attached to EmotivaHeart,
 // allowing frontends to trigger one-time moves or
 // rotations (e.g. a head tilt or nod) without
 // dealing with lower-level state management.
@@ -24,52 +24,72 @@ impl EmotivaHeart {
     ///
     /// * `layer` - Name of the target layer.
     ///
-    /// Returns a unique motion ID for tracking.
-    pub fn motion_play(&mut self, layer: &str) -> u64 {
-        let id = self.assign_id_to_motion(layer);
-        if let Some(motion) = self.motions.get_mut(layer) {
-            motion.play()
+    /// Returns an animation ID as Some(ID) for tracking if it suceeds, or None
+    /// if it failed.
+    pub fn motion_play(&mut self, layer: &str) -> Option<u64> {
+        if self.motions.contains_key(layer) {
+            let id = self.next_id();
+            if let Some(motion) = self.motions.get_mut(layer) {
+                motion.set_animation_id(id);
+                motion.play();
+                return Some(id);
+            }
         }
-        id
+        None
     }
 
     /// Plays the **reverse** of the motion animation on the given layer.
     ///
     /// * `layer` - Name of the target layer.
     ///
-    /// Returns a unique motion ID for tracking.
-    pub fn motion_reverse(&mut self, layer: &str) -> u64 {
-        let id = self.assign_id_to_motion(layer);
-        if let Some(motion) = self.motions.get_mut(layer) {
-            motion.reverse()
+    /// Returns an animation ID as Some(ID) for tracking if it suceeds, or None
+    /// if it failed.
+    pub fn motion_reverse(&mut self, layer: &str) -> Option<u64> {
+        if self.motions.contains_key(layer) {
+            let id = self.next_id();
+            if let Some(motion) = self.motions.get_mut(layer) {
+                motion.set_animation_id(id);
+                motion.reverse();
+                return Some(id);
+            }
         }
-        id
+        None
     }
 
     /// Plays a forward one-shot **rotation** animation on the given layer.
     ///
     /// * `layer` - Name of the target layer.
     ///
-    /// Returns a unique rotation ID for tracking.
-    pub fn rotation_play(&mut self, layer: &str) -> u64 {
-        let id = self.assign_id_to_rotation(layer);
-        if let Some(rotation) = self.rotations.get_mut(layer) {
-            rotation.play()
+    /// Returns an animation ID as Some(ID) for tracking if it suceeds, or None
+    /// if it failed.
+    pub fn rotation_play(&mut self, layer: &str) -> Option<u64> {
+        if self.rotations.contains_key(layer) {
+            let id = self.next_id();
+            if let Some(rotation) = self.rotations.get_mut(layer) {
+                rotation.set_animation_id(id);
+                rotation.play();
+                return Some(id);
+            }
         }
-        id
+        None
     }
 
     /// Plays the **reverse** of the rotation animation on the given layer.
     ///
     /// * `layer` - Name of the target layer.
     ///
-    /// Returns a unique rotation ID for tracking.
-    pub fn rotation_reverse(&mut self, layer: &str) -> u64 {
-        let id = self.assign_id_to_rotation(layer);
-        if let Some(rotation) = self.rotations.get_mut(layer) {
-            rotation.reverse()
+    /// Returns an animation ID as Some(ID) for tracking if it suceeds, or None
+    /// if it failed.
+    pub fn rotation_reverse(&mut self, layer: &str) -> Option<u64> {
+        if self.rotations.contains_key(layer) {
+            let id = self.next_id();
+            if let Some(rotation) = self.rotations.get_mut(layer) {
+                rotation.set_animation_id(id);
+                rotation.reverse();
+                return Some(id);
+            }
         }
-        id
+        None
     }
 
     /// Checks if the **motion** animation on the given layer has finished.

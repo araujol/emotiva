@@ -108,7 +108,7 @@ impl TweenState {
         self.paused = false;
     }
 
-    pub fn start_easing(&mut self, _tween: &Tween) {
+    pub fn start_easing(&mut self) {
         self.time = 0.0;
         self.enabled = false; // becomes true after easing
         self.paused = false;

@@ -84,7 +84,7 @@ pub struct EmotivaHeart {
     pub delays: HashMap<u64, Delay>,
 
     /// Next animation ID generator
-    pub next_animation_id: u64,
+    next_animation_id: u64,
 
     /// Callback maps keyed by animation ID
     pub callbacks_on_start: HashMap<u64, Vec<Box<dyn FnOnce(&mut EmotivaHeart)>>>,
@@ -299,47 +299,6 @@ impl EmotivaHeart {
     pub fn next_id(&mut self) -> u64 {
         let id = self.next_animation_id;
         self.next_animation_id += 1;
-        id
-    }
-
-    /// Assign an animation ID to any tween/motion/FX object being started.
-    fn assign_id_to_eyes(&mut self) -> u64 {
-        let id = self.next_id();
-        if let Some(eyes) = &mut self.eyes {
-            eyes.set_animation_id(id);
-        }
-        id
-    }
-
-    fn assign_id_to_mouth(&mut self) -> u64 {
-        let id = self.next_id();
-        if let Some(mouth) = &mut self.mouth {
-            mouth.set_animation_id(id);
-        }
-        id
-    }
-
-    fn assign_id_to_tween(&mut self, layer: &str) -> u64 {
-        let id = self.next_id();
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            tween.set_animation_id(id);
-        }
-        id
-    }
-
-    fn assign_id_to_motion(&mut self, layer: &str) -> u64 {
-        let id = self.next_id();
-        if let Some(motion) = self.motions.get_mut(layer) {
-            motion.set_animation_id(id);
-        }
-        id
-    }
-
-    fn assign_id_to_rotation(&mut self, layer: &str) -> u64 {
-        let id = self.next_id();
-        if let Some(rotation) = self.rotations.get_mut(layer) {
-            rotation.set_animation_id(id);
-        }
         id
     }
 
