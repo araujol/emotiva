@@ -14,7 +14,7 @@
 //! layered character animations in visual novels and similar 2D experiences.
 
 use crate::EmotivaHeart;
-use crate::easing::Easing;
+use crate::core::easing::Easing;
 use crate::format::load_rig_from_file;
 
 // Use crate rand from root to avoid Macroquad's re-export conflict

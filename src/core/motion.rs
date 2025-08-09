@@ -5,8 +5,8 @@
 //! linear or eased transitions between two positions or angles over time,
 //! such as smooth movement, pose shifts, or rotation transitions during scene changes.
 
-use crate::easing::{Easing, resolve};
-use crate::events::AnimEvent;
+use crate::core::easing::{Easing, resolve};
+use crate::core::events::AnimEvent;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction {

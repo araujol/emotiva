@@ -6,8 +6,8 @@
 //! These effects are applied per-layer via API only (not loaded from .ron files).
 //! Designed for composability and integration with `CharAnimator`.
 
-use crate::easing::{Easing, resolve as resolve_easing};
-use crate::events::AnimEvent;
+use crate::core::easing::{Easing, resolve as resolve_easing};
+use crate::core::events::AnimEvent;
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]

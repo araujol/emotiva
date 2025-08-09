@@ -13,10 +13,10 @@
 
 use std::collections::HashMap;
 
+use crate::core::fx::VisualFxState;
+use crate::core::motion::{Motion2D, Rotation};
+use crate::core::tween::TweenState;
 use crate::format::CharRig;
-use crate::fx::VisualFxState;
-use crate::motion::{Motion2D, Rotation};
-use crate::tween::TweenState;
 use macroquad::prelude::Vec2;
 
 #[derive(Debug, Clone, Copy)]

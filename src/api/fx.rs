@@ -17,7 +17,8 @@
 // ==========================================
 
 use crate::EmotivaHeart;
-use crate::easing::Easing;
+use crate::core::easing::Easing;
+use crate::core::fx::{make_alpha_fx, make_scale_fx, make_tint_fx};
 
 impl EmotivaHeart {
     /// Starts a scaling FX on the specified layer.
@@ -38,10 +39,8 @@ impl EmotivaHeart {
         easing: Easing,
     ) -> u64 {
         let id = self.next_id();
-        self.visual_fx.add_scale_fx(
-            layer,
-            crate::fx::make_scale_fx(from, to, duration, easing, Some(id)),
-        );
+        self.visual_fx
+            .add_scale_fx(layer, make_scale_fx(from, to, duration, easing, Some(id)));
         id
     }
 
@@ -68,10 +67,8 @@ impl EmotivaHeart {
         easing: Easing,
     ) -> u64 {
         let id = self.next_id();
-        self.visual_fx.add_alpha_fx(
-            layer,
-            crate::fx::make_alpha_fx(from, to, duration, easing, Some(id)),
-        );
+        self.visual_fx
+            .add_alpha_fx(layer, make_alpha_fx(from, to, duration, easing, Some(id)));
         id
     }
 
@@ -98,10 +95,8 @@ impl EmotivaHeart {
         easing: Easing,
     ) -> u64 {
         let id = self.next_id();
-        self.visual_fx.add_tint_fx(
-            layer,
-            crate::fx::make_tint_fx(from, to, duration, easing, Some(id)),
-        );
+        self.visual_fx
+            .add_tint_fx(layer, make_tint_fx(from, to, duration, easing, Some(id)));
         id
     }
 

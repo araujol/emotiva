@@ -10,7 +10,7 @@
 //!
 //! This is the bridge between static character definitions and the animation engine.
 
-use crate::easing::Easing;
+use crate::core::easing::Easing;
 use ron::de::from_reader;
 use serde::Deserialize;
 use std::collections::HashMap;

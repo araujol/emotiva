@@ -4,8 +4,8 @@
 //! for character layers, based on the `Tween` data defined in the `format` module.
 //! These animations loop continuously and add natural motion to static images.
 
-use crate::easing::{Easing, resolve};
-use crate::events::AnimEvent;
+use crate::core::easing::{Easing, resolve};
+use crate::core::events::AnimEvent;
 use crate::format::Tween;
 
 /// Represents the animated state of a tweened layer at runtime.

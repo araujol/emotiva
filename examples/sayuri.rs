@@ -27,9 +27,9 @@
 // ==========================================
 
 use emotiva::EmotivaHeart;
+use emotiva::api::Easing;
 use emotiva::api::EmotivaAPI;
-use emotiva::easing::Easing;
-use emotiva::quad::EmotivaQuad;
+use emotiva::frontend::quad::EmotivaQuad;
 
 use macroquad::prelude::*;
 

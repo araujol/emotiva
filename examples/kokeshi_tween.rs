@@ -1,5 +1,5 @@
 use emotiva::api::EmotivaAPI;
-use emotiva::quad::EmotivaQuad;
+use emotiva::frontend::quad::EmotivaQuad;
 
 use macroquad::prelude::*;
 

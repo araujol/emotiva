@@ -23,34 +23,29 @@
 //! ==========================================
 
 pub mod anim;
-pub mod delay;
-pub mod easing;
-pub mod events;
+pub mod core;
 pub mod format;
-pub mod fx;
-pub mod motion;
-pub mod quad;
-pub mod transform;
-pub mod tween;
+
+#[cfg(feature = "macroquad")]
+pub mod frontend;
 
 pub mod api;
 pub mod macros;
 
-pub mod palette;
-
 use anim::eyes::EyesState;
 use anim::mouth::MouthState;
-use delay::Delay;
+use core::delay::Delay;
+use core::fx::VisualFxState;
+use core::motion::{Motion2D, Rotation};
+use core::transform::{WorldTransform, resolve_all_transforms};
+use core::tween::TweenState;
 use format::CharRig;
-use fx::VisualFxState;
-use motion::{Motion2D, Rotation};
-use tween::TweenState;
 
 use rand::Rng;
 use std::collections::HashMap;
 
-use crate::easing::Easing;
-use crate::events::AnimEvent;
+use crate::core::easing::Easing;
+use crate::core::events::AnimEvent;
 
 /// The result of a frame update: a layer with absolute transform info.
 #[derive(Debug, Clone)]
@@ -238,8 +233,6 @@ impl EmotivaHeart {
 
     /// Returns transformed sprites to render this frame.
     pub fn get_drawables(&mut self) -> Vec<DrawableSprite> {
-        use crate::transform::resolve_all_transforms;
-
         let mut output = Vec::new();
         let transforms = resolve_all_transforms(
             &self.rig,
@@ -269,7 +262,7 @@ impl EmotivaHeart {
                 }
             }
 
-            let fallback = &transform::WorldTransform::default();
+            let fallback = &WorldTransform::default();
             let transform = transforms.get(&layer.name).unwrap_or(fallback);
 
             let final_image = self

@@ -24,7 +24,7 @@ pub mod layer;
 pub mod motion;
 pub mod tween;
 
-use crate::easing::Easing;
+pub use crate::core::easing::Easing;
 
 pub trait EmotivaAPI {
     // Eyes
