@@ -32,6 +32,43 @@ pub struct EmotivaQuad {
 }
 
 impl EmotivaQuad {
+    /// Creates an `EmotivaQuad` using preloaded textures (no disk I/O).
+    pub fn with_textures(path: &str, textures: HashMap<String, Texture2D>) -> Self {
+        let rig = load_rig_from_file(path).expect("Failed to load .ron rig file");
+        let rng = rng();
+        let heart = EmotivaHeart::new(rig);
+
+        // (Debug) validate required textures are present
+        #[cfg(debug_assertions)]
+        {
+            for layer in &heart.rig.layers {
+                if !textures.contains_key(&layer.image) {
+                    eprintln!(
+                        "[EmotivaQuad] Missing texture for base image '{}'",
+                        layer.image
+                    );
+                }
+                if let Some(variants) = &layer.variants {
+                    for image_path in variants.values() {
+                        if !textures.contains_key(image_path) {
+                            eprintln!(
+                                "[EmotivaQuad] Missing texture for variant image '{}'",
+                                image_path
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        EmotivaQuad {
+            heart,
+            textures,
+            rng,
+            base_position: Vec2::ZERO,
+        }
+    }
+
     pub async fn load(path: &str, texture_base_path: &str) -> Self {
         let rig = load_rig_from_file(path).expect("Failed to load .ron rig file");
         let rng = rng();
