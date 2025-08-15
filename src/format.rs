@@ -11,12 +11,9 @@
 //! This is the bridge between static character definitions and the animation engine.
 
 use crate::core::easing::Easing;
-use ron::de::from_reader;
+use ron::from_str;
 use serde::Deserialize;
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::BufReader;
-use std::path::Path;
 use thiserror::Error;
 
 /// Errors that can occur while loading a character rig file.
@@ -141,10 +138,12 @@ pub struct CharRig {
     pub mouth: Option<MouthConfig>,
 }
 
-/// Loads a character rig from a `.ron` file path.
-pub fn load_rig_from_file<P: AsRef<Path>>(path: P) -> Result<CharRig, RigLoadError> {
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-    let rig = from_reader(reader)?;
+/// Loads a character rig from a `.ron` file path in async mode.
+pub async fn load_rig_from_file(path: &str) -> Result<CharRig, RigLoadError> {
+    let contents = macroquad::file::load_string(path).await.map_err(|e| {
+        use std::io::{Error as IoError, ErrorKind};
+        RigLoadError::Io(IoError::new(ErrorKind::Other, e.to_string()))
+    })?;
+    let rig: CharRig = from_str(&contents)?;
     Ok(rig)
 }

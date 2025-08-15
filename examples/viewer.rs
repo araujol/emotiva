@@ -16,7 +16,8 @@ fn window_conf() -> Conf {
 #[macroquad::main(window_conf)]
 async fn main() {
     let texture: Texture2D = load_texture("test_data/dojo.png").await.unwrap();
-    let mut emotiva = EmotivaQuad::load("test_data/example.emotiva.ron", "test_sprites/yuki").await;
+    let mut emotiva =
+        EmotivaQuad::load_from_path("test_data/example.emotiva.ron", "test_sprites/yuki").await;
     //emotiva.set_base_position(Vec2::new(768.0, 512.0));
 
     let mut elapsed = 0.0;

@@ -15,11 +15,15 @@
 
 use crate::EmotivaHeart;
 use crate::core::easing::Easing;
+use crate::format::CharRig;
 use crate::format::load_rig_from_file;
+use ron::de::from_str as ron_from_str;
 
-// Use crate rand from root to avoid Macroquad's re-export conflict
-use ::rand::rng;
-use ::rand::rngs::ThreadRng;
+// RNG: native uses ThreadRng; wasm uses a seeded ChaCha8 (no OS entropy)
+#[cfg(not(target_arch = "wasm32"))]
+use ::rand::{rng, rngs::ThreadRng};
+#[cfg(target_arch = "wasm32")]
+use rand_chacha::{ChaCha8Rng, rand_core::SeedableRng};
 use std::collections::HashMap;
 
 use macroquad::prelude::*;
@@ -27,15 +31,36 @@ use macroquad::prelude::*;
 pub struct EmotivaQuad {
     heart: EmotivaHeart,
     textures: HashMap<String, Texture2D>,
+    #[cfg(not(target_arch = "wasm32"))]
     rng: ThreadRng,
+    #[cfg(target_arch = "wasm32")]
+    rng: ChaCha8Rng,
     base_position: Vec2,
 }
 
 impl EmotivaQuad {
-    /// Creates an `EmotivaQuad` using preloaded textures (no disk I/O).
-    pub fn with_textures(path: &str, textures: HashMap<String, Texture2D>) -> Self {
-        let rig = load_rig_from_file(path).expect("Failed to load .ron rig file");
+    /// Creates an `EmotivaQuad` from a pre-parsed rig RON string and preloaded textures (synchronous).
+    pub fn from_ron_str(ron: &str, textures: HashMap<String, Texture2D>) -> Self {
+        let rig: CharRig = ron_from_str(ron).expect("Failed to parse Emotiva rig RON");
+        Self::from_rig(rig, textures)
+    }
+
+    /// Creates an `EmotivaQuad` using the rig file and preloaded textures.
+    pub async fn from_rig_file(path: &str, textures: HashMap<String, Texture2D>) -> Self {
+        let rig = load_rig_from_file(path)
+            .await
+            .expect("Failed to load .ron rig file");
+        Self::from_rig(rig, textures)
+    }
+
+    /// Creates an `EmotivaQuad` from a pre-parsed rig and preloaded textures (synchronous).
+    pub fn from_rig(rig: CharRig, textures: HashMap<String, Texture2D>) -> Self {
+        #[cfg(not(target_arch = "wasm32"))]
         let rng = rng();
+        #[cfg(target_arch = "wasm32")]
+        let rng = ChaCha8Rng::seed_from_u64(12345);
+
+        // Create heart
         let heart = EmotivaHeart::new(rig);
 
         // (Debug) validate required textures are present
@@ -43,7 +68,7 @@ impl EmotivaQuad {
         {
             for layer in &heart.rig.layers {
                 if !textures.contains_key(&layer.image) {
-                    eprintln!(
+                    info!(
                         "[EmotivaQuad] Missing texture for base image '{}'",
                         layer.image
                     );
@@ -51,7 +76,7 @@ impl EmotivaQuad {
                 if let Some(variants) = &layer.variants {
                     for image_path in variants.values() {
                         if !textures.contains_key(image_path) {
-                            eprintln!(
+                            info!(
                                 "[EmotivaQuad] Missing texture for variant image '{}'",
                                 image_path
                             );
@@ -69,9 +94,16 @@ impl EmotivaQuad {
         }
     }
 
-    pub async fn load(path: &str, texture_base_path: &str) -> Self {
-        let rig = load_rig_from_file(path).expect("Failed to load .ron rig file");
+    // Create an `EmotivaQuad` object using the rig file and textures path.
+    // This function loads the textures directly.
+    pub async fn load_from_path(path: &str, texture_base_path: &str) -> Self {
+        let rig = load_rig_from_file(path)
+            .await
+            .expect("Failed to load .ron rig file");
+        #[cfg(not(target_arch = "wasm32"))]
         let rng = rng();
+        #[cfg(target_arch = "wasm32")]
+        let rng = ChaCha8Rng::seed_from_u64(12345);
         let heart = EmotivaHeart::new(rig);
 
         let mut textures: HashMap<String, Texture2D> = HashMap::new();

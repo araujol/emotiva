@@ -17,7 +17,8 @@ fn window_conf() -> Conf {
 async fn main() {
     let texture: Texture2D = load_texture("test_data/dojo.png").await.unwrap();
 
-    let mut emotiva = EmotivaQuad::load("test_data/kokeshi.emotiva.ron", "test_data/").await;
+    let mut emotiva =
+        EmotivaQuad::load_from_path("test_data/kokeshi.emotiva.ron", "test_data/").await;
     emotiva.set_base_position(Vec2::new(0.0, 0.0));
 
     let mut elapsed = 0.0;

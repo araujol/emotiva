@@ -80,6 +80,7 @@ version = "0.1.0"
 dependencies = [
  "macroquad",
  "rand",
+ "rand_chacha",
  "ron",
  "serde",
  "thiserror",

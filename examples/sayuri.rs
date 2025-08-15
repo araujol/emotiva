@@ -47,7 +47,7 @@ fn window_conf() -> Conf {
 async fn main() {
     let texture: Texture2D = load_texture("test_data/dojo.png").await.unwrap();
     let mut emotiva =
-        EmotivaQuad::load("test_data/sayuri.emotiva.ron", "test_sprites/sayuri").await;
+        EmotivaQuad::load_from_path("test_data/sayuri.emotiva.ron", "test_sprites/sayuri").await;
 
     let mut elapsed = 0.0;
     let mut state = 0; // 0: Idle delay, 1: Running, 2: Cooldown
