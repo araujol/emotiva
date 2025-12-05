@@ -231,8 +231,6 @@ impl EmotivaAPI for EmotivaQuad {
         fn rotation_reverse(&mut self, layer: &str) -> Option<u64>;
         fn tween_start(&mut self, layer: &str) -> Option<u64>;
         fn tween_stop(&mut self, layer: &str);
-        fn tween_start_easing(&mut self, layer: &str) -> Option<u64>;
-        fn tween_stop_easing(&mut self, layer: &str);
         fn tween_pause(&mut self, layer: &str);
         fn tween_resume(&mut self, layer: &str);
         fn set_scale(&mut self, layer: &str, min: f32, max: f32, speed: f32, easing: Easing) -> u64;

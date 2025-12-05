@@ -139,9 +139,9 @@ fn reset_layers_and_start_anim(emo: &mut EmotivaHeart) {
 /// Stops all idle animation and face motion.
 /// Called after ~20s of the cycle.
 fn stop_idle_cycle(emotiva: &mut EmotivaQuad) {
-    emotiva.tween_stop_easing("base");
-    emotiva.tween_stop_easing("hair_behind");
-    emotiva.tween_stop_easing("hair_front");
+    emotiva.tween_stop("base");
+    emotiva.tween_stop("hair_behind");
+    emotiva.tween_stop("hair_front");
     emotiva.tween_stop("mouth_open");
     emotiva.mouth_stop();
     emotiva.eyes_stop();

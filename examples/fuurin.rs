@@ -31,9 +31,9 @@ async fn main() {
         elapsed += delta;
         if elapsed >= 10.0 {
             if toggled {
-                emotiva.tween_start_easing("base");
+                emotiva.tween_start("base");
             } else {
-                emotiva.tween_stop_easing("base");
+                emotiva.tween_stop("base");
             }
             toggled = !toggled;
             elapsed = 0.0;

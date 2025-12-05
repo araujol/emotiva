@@ -30,7 +30,15 @@ impl EmotivaHeart {
             let id = self.next_id();
             if let Some(tween) = self.tweens.get_mut(layer) {
                 tween.set_animation_id(id);
-                tween.start();
+                tween.start_with_tween(
+                    &self
+                        .rig
+                        .layers
+                        .iter()
+                        .find(|l| l.name == layer)
+                        .and_then(|l| l.tween.as_ref())
+                        .unwrap(),
+                );
                 return Some(id);
             }
         }
@@ -40,36 +48,15 @@ impl EmotivaHeart {
     /// Stops any running **tween** on the specified layer immediately.
     pub fn tween_stop(&mut self, layer: &str) {
         if let Some(tween) = self.tweens.get_mut(layer) {
-            tween.stop();
-        }
-    }
-
-    /// Starts a **tween** with easing values defined in the `.ron` rig file.
-    ///
-    /// * `layer` - The name of the layer to tween.
-    ///
-    /// Returns an animation ID as Some(ID) for tracking if it suceeds, or None
-    /// if it failed.
-    pub fn tween_start_easing(&mut self, layer: &str) -> Option<u64> {
-        if self.tweens.contains_key(layer) {
-            let id = self.next_id();
-            if let Some(tween) = self.tweens.get_mut(layer) {
-                tween.set_animation_id(id);
-                tween.start_easing();
-                return Some(id);
-            }
-        }
-        None
-    }
-
-    /// Stops a **tween** with easing values defined in the `.ron` rig file.
-    pub fn tween_stop_easing(&mut self, layer: &str) {
-        if let Some(tween) = self.tweens.get_mut(layer) {
-            if let Some(layer_def) = self.rig.layers.iter().find(|l| l.name == layer) {
-                if let Some(tween_def) = &layer_def.tween {
-                    tween.stop_easing(tween_def);
-                }
-            }
+            tween.stop_with_tween(
+                &self
+                    .rig
+                    .layers
+                    .iter()
+                    .find(|l| l.name == layer)
+                    .and_then(|l| l.tween.as_ref())
+                    .unwrap(),
+            );
         }
     }
 

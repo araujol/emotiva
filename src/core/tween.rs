@@ -85,6 +85,28 @@ impl TweenState {
         self.animation_id = Some(id);
     }
 
+    /// Start with `tween.easing_start` if it is present, otherwise
+    /// it will start the plain tween.
+    pub fn start_with_tween(&mut self, tween: &Tween) {
+        if tween.easing_start.is_some() {
+            // Use the easing entry path
+            self.start_easing();
+        } else {
+            // Use the default immediate-on start path
+            self.start();
+        }
+    }
+
+    /// Stop with `tween.easing_stop` if present, otherwise it will
+    /// stop immediately.
+    pub fn stop_with_tween(&mut self, tween: &Tween) {
+        if tween.easing_stop.is_some() {
+            self.stop_easing(tween);
+        } else {
+            self.stop();
+        }
+    }
+
     pub fn start(&mut self) {
         self.enabled = true;
         self.paused = false;

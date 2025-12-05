@@ -39,13 +39,13 @@ async fn main() {
                     emotiva.tween_resume("doll");
                 } else {
                     println!("# START EASING");
-                    emotiva.tween_start_easing("doll");
+                    emotiva.tween_start("doll");
                 }
             } else {
                 if i >= 3 {
                     i = 0;
                     println!("# STOP EASING");
-                    emotiva.tween_stop_easing("doll");
+                    emotiva.tween_stop("doll");
                 } else {
                     println!("# PAUSED");
                     emotiva.tween_pause("doll");

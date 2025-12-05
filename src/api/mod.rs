@@ -55,8 +55,6 @@ pub trait EmotivaAPI {
     // Tween
     fn tween_start(&mut self, layer: &str) -> Option<u64>;
     fn tween_stop(&mut self, layer: &str);
-    fn tween_start_easing(&mut self, layer: &str) -> Option<u64>;
-    fn tween_stop_easing(&mut self, layer: &str);
     fn tween_pause(&mut self, layer: &str);
     fn tween_resume(&mut self, layer: &str);
     fn is_tween_enabled(&self, layer: &str) -> bool;
