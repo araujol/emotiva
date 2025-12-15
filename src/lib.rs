@@ -125,7 +125,9 @@ impl EmotivaHeart {
 
         // Layers
         for layer in rig.layers.iter() {
-            tweens.insert(layer.name.clone(), TweenState::new());
+            if layer.tween.is_some() {
+                tweens.insert(layer.name.clone(), TweenState::new());
+            }
 
             if let Some(def) = &layer.motion {
                 motions.insert(

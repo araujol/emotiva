@@ -30,15 +30,17 @@ impl EmotivaHeart {
             let id = self.next_id();
             if let Some(tween) = self.tweens.get_mut(layer) {
                 tween.set_animation_id(id);
-                tween.start_with_tween(
-                    &self
-                        .rig
-                        .layers
-                        .iter()
-                        .find(|l| l.name == layer)
-                        .and_then(|l| l.tween.as_ref())
-                        .unwrap(),
-                );
+                if let Some(tween_def) = self
+                    .rig
+                    .layers
+                    .iter()
+                    .find(|l| l.name == layer)
+                    .and_then(|l| l.tween.as_ref())
+                {
+                    tween.start_with_tween(tween_def);
+                } else {
+                    tween.start();
+                }
                 return Some(id);
             }
         }
@@ -48,15 +50,17 @@ impl EmotivaHeart {
     /// Stops any running **tween** on the specified layer immediately.
     pub fn tween_stop(&mut self, layer: &str) {
         if let Some(tween) = self.tweens.get_mut(layer) {
-            tween.stop_with_tween(
-                &self
-                    .rig
-                    .layers
-                    .iter()
-                    .find(|l| l.name == layer)
-                    .and_then(|l| l.tween.as_ref())
-                    .unwrap(),
-            );
+            if let Some(tween_def) = self
+                .rig
+                .layers
+                .iter()
+                .find(|l| l.name == layer)
+                .and_then(|l| l.tween.as_ref())
+            {
+                tween.stop_with_tween(tween_def);
+            } else {
+                tween.stop();
+            }
         }
     }
 
