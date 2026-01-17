@@ -13,10 +13,10 @@
 //! This module is intended for use in applications using Macroquad to display expressive,
 //! layered character animations in visual novels and similar 2D experiences.
 
-use crate::EmotivaHeart;
 use crate::core::easing::Easing;
 use crate::format::CharRig;
 use crate::format::load_rig_from_file;
+use crate::{DrawableSprite, EmotivaHeart};
 use ron::de::from_str as ron_from_str;
 
 // RNG: native uses ThreadRng; wasm uses a seeded ChaCha8 (no OS entropy)
@@ -177,6 +177,24 @@ impl EmotivaQuad {
     }
 
     // =============== EmotivaQuad API Methods =============== //
+
+    /// Return the list of drawable sprites for the current frame.
+    ///
+    /// This exposes Emotiva’s **resolved, per-frame visual output** without
+    /// performing any rendering. The returned `DrawableSprite`s contain
+    /// fully evaluated transforms (position, scale, rotation, alpha, tint)
+    /// derived from the rig and all active animations.
+    pub fn drawables(&mut self) -> Vec<DrawableSprite> {
+        self.heart.get_drawables()
+    }
+
+    /// Returns a read-only view of textures owned by this EmotivaQuad.
+    pub fn textures(&self) -> &HashMap<String, Texture2D> {
+        &self.textures
+    }
+
+    /// Convenient function to set the drawing position of the object.
+    /// This method doesn't affect the drawable sprites state.
     pub fn set_base_position(&mut self, pos: Vec2) {
         self.base_position = pos;
     }
