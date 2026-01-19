@@ -8,9 +8,10 @@
 
 use crate::core::easing::{Easing, resolve as resolve_easing};
 use crate::core::events::AnimEvent;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ScaleFxKind {
     pub from: f32,
     pub to: f32,
@@ -21,7 +22,7 @@ pub struct ScaleFxKind {
     pub animation_id: Option<u64>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AlphaFxKind {
     pub from: f32,
     pub to: f32,
@@ -32,7 +33,7 @@ pub struct AlphaFxKind {
     pub animation_id: Option<u64>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TintFxKind {
     pub from: [f32; 4],
     pub to: [f32; 4],
@@ -43,14 +44,24 @@ pub struct TintFxKind {
     pub animation_id: Option<u64>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TransformOffset {
     pub scale: Option<f32>,
     pub alpha: Option<f32>,
     pub tint: Option<[f32; 4]>,
 }
 
-#[derive(Debug)]
+impl Default for TransformOffset {
+    fn default() -> Self {
+        Self {
+            scale: None,
+            alpha: None,
+            tint: None,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct VisualFxState {
     time: f32,
     scale_fx: HashMap<String, ScaleFxKind>,

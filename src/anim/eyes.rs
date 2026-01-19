@@ -8,7 +8,9 @@
 
 use crate::AnimEvent;
 use rand::Rng;
+use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct EyesState {
     next_blink_time: f32,
     blink_duration: f32,

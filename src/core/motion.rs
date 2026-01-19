@@ -7,14 +7,15 @@
 
 use crate::core::easing::{Easing, resolve};
 use crate::core::events::AnimEvent;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Direction {
     Forward,
     Reverse,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Motion2D {
     start: (f32, f32),
     end: (f32, f32),
@@ -108,7 +109,7 @@ impl Motion2D {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Rotation {
     motion: Motion2D,
 }

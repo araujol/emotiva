@@ -25,6 +25,7 @@
 pub mod anim;
 pub mod core;
 pub mod format;
+pub mod snapshot;
 
 #[cfg(feature = "macroquad")]
 pub mod frontend;

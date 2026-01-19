@@ -29,8 +29,9 @@
 
 use crate::AnimEvent;
 use rand::Rng;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct MouthState {
     talking_enabled: bool,
     talking: bool,

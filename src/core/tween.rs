@@ -8,8 +8,10 @@ use crate::core::easing::{Easing, resolve};
 use crate::core::events::AnimEvent;
 use crate::format::Tween;
 
+use serde::{Deserialize, Serialize};
+
 /// Represents the animated state of a tweened layer at runtime.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct TweenState {
     time: f32,
     enabled: bool,
@@ -35,7 +37,7 @@ impl Default for TweenState {
 }
 
 /// The current per-frame animated offset for a layer.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct TweenOffset {
     pub dx: f32,
     pub dy: f32,

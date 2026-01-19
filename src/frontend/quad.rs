@@ -16,6 +16,7 @@
 use crate::core::easing::Easing;
 use crate::format::CharRig;
 use crate::format::load_rig_from_file;
+use crate::snapshot::EmotivaSnapshot;
 use crate::{DrawableSprite, EmotivaHeart};
 use ron::de::from_str as ron_from_str;
 
@@ -220,6 +221,14 @@ impl EmotivaQuad {
         F: FnOnce(&mut EmotivaHeart) + 'static,
     {
         self.heart.on_delay(duration, cb);
+    }
+
+    pub fn save_state(&self) -> EmotivaSnapshot {
+        self.heart.save_snapshot()
+    }
+
+    pub fn load_state(&mut self, snap: EmotivaSnapshot) {
+        self.heart.load_snapshot(snap);
     }
 }
 

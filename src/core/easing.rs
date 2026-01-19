@@ -14,11 +14,11 @@
 //! These functions are pure and stateless, making them ideal for use in
 //! animation engines, game loops, or real-time visual applications.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::f32::consts::{FRAC_PI_2, PI};
 
 /// Supported easing curve.
-#[derive(Debug, Clone, Copy, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum Easing {
     Linear,
     SineIn,

@@ -8,8 +8,9 @@
 //! allowing developers to sequence animations without a timeline engine or queue logic.
 
 use crate::AnimEvent;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Delay {
     /// Total time the delay should last (in seconds)
     pub duration: f32,
