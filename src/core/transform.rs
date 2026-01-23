@@ -17,11 +17,10 @@ use crate::core::fx::VisualFxState;
 use crate::core::motion::{Motion2D, Rotation};
 use crate::core::tween::TweenState;
 use crate::format::CharRig;
-use macroquad::prelude::Vec2;
 
 #[derive(Debug, Clone, Copy)]
 pub struct WorldTransform {
-    pub position: Vec2,
+    pub position: (f32, f32),
     pub rotation: f32,
     pub scale: f32,
     pub alpha: f32,
@@ -31,7 +30,7 @@ pub struct WorldTransform {
 impl Default for WorldTransform {
     fn default() -> Self {
         Self {
-            position: Vec2::ZERO,
+            position: (0.0, 0.0),
             rotation: 0.0,
             scale: 1.0,
             alpha: 1.0,
@@ -78,7 +77,7 @@ fn resolve_layer_transform(
     let layer = rig.layers.iter().find(|l| l.name == name).unwrap();
 
     // Base local position
-    let mut pos = layer.offset.map_or(Vec2::ZERO, |o| Vec2::new(o.0, o.1));
+    let mut pos = layer.offset.unwrap_or((0.0, 0.0));
     let mut rot = 0.0;
     let mut scale = layer.scale.unwrap_or(1.0);
     let mut alpha = 1.0;
@@ -88,7 +87,8 @@ fn resolve_layer_transform(
     if let Some(tween_def) = &layer.tween {
         if let Some(state) = tweens.get_mut(&layer.name) {
             let offs = state.value(tween_def);
-            pos += Vec2::new(offs.dx, offs.dy);
+            pos.0 += offs.dx;
+            pos.1 += offs.dy;
             rot += offs.rotation;
         }
     }
@@ -96,7 +96,8 @@ fn resolve_layer_transform(
     // Motion
     if let Some(m) = motions.get(&layer.name) {
         let (dx, dy) = m.value();
-        pos += Vec2::new(dx, dy);
+        pos.0 += dx;
+        pos.1 += dy;
     }
 
     // Rotation
@@ -141,7 +142,10 @@ fn resolve_layer_transform(
 fn combine(parent: &WorldTransform, local: &WorldTransform) -> WorldTransform {
     let rotated_offset = rotate_point(local.position, parent.rotation);
     WorldTransform {
-        position: parent.position + rotated_offset,
+        position: (
+            parent.position.0 + rotated_offset.0,
+            parent.position.1 + rotated_offset.1,
+        ),
         rotation: parent.rotation + local.rotation,
         scale: parent.scale * local.scale,
         alpha: parent.alpha * local.alpha,
@@ -149,8 +153,8 @@ fn combine(parent: &WorldTransform, local: &WorldTransform) -> WorldTransform {
     }
 }
 
-fn rotate_point(point: Vec2, angle: f32) -> Vec2 {
+fn rotate_point(point: (f32, f32), angle: f32) -> (f32, f32) {
     let cos = angle.cos();
     let sin = angle.sin();
-    Vec2::new(point.x * cos - point.y * sin, point.x * sin + point.y * cos)
+    (point.0 * cos - point.1 * sin, point.0 * sin + point.1 * cos)
 }

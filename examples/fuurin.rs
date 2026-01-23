@@ -1,5 +1,5 @@
+use emotiva::Emotiva;
 use emotiva::api::EmotivaAPI;
-use emotiva::frontend::quad::EmotivaQuad;
 
 use macroquad::prelude::*;
 
@@ -18,7 +18,7 @@ async fn main() {
     let texture: Texture2D = load_texture("test_data/dojo.png").await.unwrap();
 
     let mut emotiva =
-        EmotivaQuad::load_from_path("test_data/example_fuurin.emotiva.ron", "test_data").await;
+        Emotiva::load_with_textures("test_data/example_fuurin.emotiva.ron", "test_data").await;
 
     let mut elapsed = 0.0;
     let mut toggled = true;

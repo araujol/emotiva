@@ -1,29 +1,33 @@
 //! Emotiva Format – Rig File Definition & Loader
 //!
-//! This module defines the serializable data structures (`CharRig`, `CharLayer`) used in `.emotiva.ron` files,
-//! and provides functions to load them from disk.
+//! This module defines the serializable data structures (`CharRig`, `CharLayer`)
+//! used in `.emotiva.ron` files,
 //!
 //! Features:
 //! - `CharRig`: Top-level character rig containing ordered layers
 //! - `CharLayer`: Describes an image layer with offset, scale, and z-index
-//! - Rig loading from `.ron` files using Serde and error handling
 //!
 //! This is the bridge between static character definitions and the animation engine.
 
 use crate::core::easing::Easing;
-use ron::from_str;
 use serde::Deserialize;
 use std::collections::HashMap;
-use thiserror::Error;
 
-/// Errors that can occur while loading a character rig file.
-#[derive(Debug, Error)]
-pub enum RigLoadError {
-    #[error("Failed to open file: {0}")]
-    Io(#[from] std::io::Error),
+#[derive(Debug, Clone, Copy, Deserialize)]
+pub struct Lean {
+    /// Maximum rotation in degrees (e.g. 5.0 = tilt ±5°)
+    pub max_angle: f32,
+}
 
-    #[error("Failed to parse RON: {0}")]
-    Ron(#[from] ron::error::SpannedError),
+/// Describes one-shot or directional motion animation.
+#[derive(Debug, Clone, Deserialize)]
+pub struct MotionDef {
+    pub target: (f32, f32),
+    pub duration: f32,
+    #[serde(default)]
+    pub easing: Option<Easing>,
+    #[serde(default)]
+    pub rotation: Option<f32>,
 }
 
 /// Describes tween animation for a layer.
@@ -46,12 +50,6 @@ pub struct Tween {
     /// Optional easing curve for stop tween motion
     #[serde(default)]
     pub easing_stop: Option<Easing>,
-}
-
-#[derive(Debug, Clone, Copy, Deserialize)]
-pub struct Lean {
-    /// Maximum rotation in degrees (e.g. 5.0 = tilt ±5°)
-    pub max_angle: f32,
 }
 
 /// A single image layer in a character rig.
@@ -87,17 +85,6 @@ pub struct CharLayer {
 
     // Whether to inherit parent's transform (default: true)
     pub inherit: Option<bool>,
-}
-
-/// Describes one-shot or directional motion animation.
-#[derive(Debug, Clone, Deserialize)]
-pub struct MotionDef {
-    pub target: (f32, f32),
-    pub duration: f32,
-    #[serde(default)]
-    pub easing: Option<Easing>,
-    #[serde(default)]
-    pub rotation: Option<f32>,
 }
 
 /// Blinking configuration for characters with animated eyes.
@@ -136,14 +123,4 @@ pub struct CharRig {
     /// Optional mouth talking animation configuration
     #[serde(default)]
     pub mouth: Option<MouthConfig>,
-}
-
-/// Loads a character rig from a `.ron` file path in async mode.
-pub async fn load_rig_from_file(path: &str) -> Result<CharRig, RigLoadError> {
-    let contents = macroquad::file::load_string(path).await.map_err(|e| {
-        use std::io::{Error as IoError, ErrorKind};
-        RigLoadError::Io(IoError::new(ErrorKind::Other, e.to_string()))
-    })?;
-    let rig: CharRig = from_str(&contents)?;
-    Ok(rig)
 }

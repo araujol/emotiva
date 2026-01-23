@@ -23,15 +23,15 @@
 //! ==========================================
 
 pub mod anim;
+pub mod api;
 pub mod core;
 pub mod format;
+pub mod macros;
 pub mod snapshot;
 
-#[cfg(feature = "macroquad")]
-pub mod frontend;
-
-pub mod api;
-pub mod macros;
+pub mod emotiva;
+// Re-export the main runtime type at the crate root
+pub use emotiva::Emotiva;
 
 use anim::eyes::EyesState;
 use anim::mouth::MouthState;
@@ -276,7 +276,7 @@ impl EmotivaHeart {
 
             output.push(DrawableSprite {
                 image: final_image,
-                position: (transform.position.x, transform.position.y),
+                position: (transform.position.0, transform.position.1),
                 scale: transform.scale,
                 rotation: transform.rotation,
                 z_index: layer.z_index,

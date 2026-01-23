@@ -26,10 +26,10 @@
 // ```
 // ==========================================
 
+use emotiva::Emotiva;
 use emotiva::EmotivaHeart;
 use emotiva::api::Easing;
 use emotiva::api::EmotivaAPI;
-use emotiva::frontend::quad::EmotivaQuad;
 
 use macroquad::prelude::*;
 
@@ -47,7 +47,7 @@ fn window_conf() -> Conf {
 async fn main() {
     let texture: Texture2D = load_texture("test_data/dojo.png").await.unwrap();
     let mut emotiva =
-        EmotivaQuad::load_from_path("test_data/sayuri.emotiva.ron", "test_sprites/sayuri").await;
+        Emotiva::load_with_textures("test_data/sayuri.emotiva.ron", "test_sprites/sayuri").await;
 
     let mut elapsed = 0.0;
     let mut state = 0; // 0: Idle delay, 1: Running, 2: Cooldown
@@ -87,7 +87,7 @@ async fn main() {
 
 /// Starts a sequence of introductory animations for Sayuri.
 /// This fades her out, changes some facial layers, then fades her back in.
-fn start_intro_sequence(emotiva: &mut EmotivaQuad) {
+fn start_intro_sequence(emotiva: &mut Emotiva) {
     let id = emotiva.set_alpha("base", 1.0, 0.0, 0.5, Easing::SineIn);
     emotiva.on_end(id, |emo| {
         intro_stage_two(emo);
@@ -138,7 +138,7 @@ fn reset_layers_and_start_anim(emo: &mut EmotivaHeart) {
 
 /// Stops all idle animation and face motion.
 /// Called after ~20s of the cycle.
-fn stop_idle_cycle(emotiva: &mut EmotivaQuad) {
+fn stop_idle_cycle(emotiva: &mut Emotiva) {
     emotiva.tween_stop("base");
     emotiva.tween_stop("hair_behind");
     emotiva.tween_stop("hair_front");
