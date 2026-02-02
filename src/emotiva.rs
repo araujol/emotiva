@@ -245,6 +245,9 @@ impl EmotivaAPI for Emotiva {
         fn is_rotation_finished(&self, layer: &str) -> bool;
         fn is_tween_enabled(&self, layer: &str) -> bool;
         fn is_tween_paused(&self, layer: &str) -> bool;
+        fn is_scale_finished(&self, layer: &str) -> bool;
+        fn is_alpha_finished(&self, layer: &str) -> bool;
+        fn is_tint_finished(&self, layer: &str) -> bool;
         }
     }
 }

@@ -1,4 +1,4 @@
-//! fx.rs
+//! core/fx.rs
 //! Emotiva FX – Visual-Only Effects Module
 //!
 //! This module applies visual-only effects such as scale and alpha animations
@@ -218,6 +218,30 @@ impl VisualFxState {
         self.scale_fx.clear();
         self.alpha_fx.clear();
         self.tint_fx.clear();
+    }
+
+    /// Returns true if the scale FX on this layer has finished, or if none exists.
+    pub fn is_scale_finished(&self, layer: &str) -> bool {
+        match self.scale_fx.get(layer) {
+            Some(fx) => fx.finished,
+            None => true,
+        }
+    }
+
+    /// Returns true if the alpha FX on this layer has finished, or if none exists.
+    pub fn is_alpha_finished(&self, layer: &str) -> bool {
+        match self.alpha_fx.get(layer) {
+            Some(fx) => fx.finished,
+            None => true,
+        }
+    }
+
+    /// Returns true if the tint FX on this layer has finished, or if none exists.
+    pub fn is_tint_finished(&self, layer: &str) -> bool {
+        match self.tint_fx.get(layer) {
+            Some(fx) => fx.finished,
+            None => true,
+        }
     }
 }
 

@@ -74,6 +74,9 @@ pub trait EmotivaAPI {
     ) -> u64;
     fn remove_tint(&mut self, layer: &str);
     fn clear_all_fx(&mut self);
+    fn is_scale_finished(&self, layer: &str) -> bool;
+    fn is_alpha_finished(&self, layer: &str) -> bool;
+    fn is_tint_finished(&self, layer: &str) -> bool;
     // Delay
     fn set_delay(&mut self, duration: f32) -> u64;
 }

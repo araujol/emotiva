@@ -109,4 +109,19 @@ impl EmotivaHeart {
     pub fn clear_all_fx(&mut self) {
         self.visual_fx.clear_all_fx();
     }
+
+    /// Returns true if the scale FX on the specified layer has finished, or if none exists.
+    pub fn is_scale_finished(&self, layer: &str) -> bool {
+        self.visual_fx.is_scale_finished(layer)
+    }
+
+    /// Returns true if the alpha FX on the specified layer has finished, or if none exists.
+    pub fn is_alpha_finished(&self, layer: &str) -> bool {
+        self.visual_fx.is_alpha_finished(layer)
+    }
+
+    /// Returns true if the tint FX on the specified layer has finished, or if none exists.
+    pub fn is_tint_finished(&self, layer: &str) -> bool {
+        self.visual_fx.is_tint_finished(layer)
+    }
 }
