@@ -1,0 +1,39 @@
+// -----------------------------------------------------------------------------
+// Emotiva Character Rig Definition
+// -----------------------------------------------------------------------------
+//
+// This file defines a character rig used by the Emotiva animation system.
+//
+// A rig describes:
+//   • The sprite layers that compose the character
+//   • Layer hierarchy and parent relationships
+//   • Z-index ordering
+//   • Transform defaults (offset, scale)
+//   • Idle animation parameters (sway, lean, breathing, etc.)
+//   • Eye blink configuration
+//
+// This file does NOT contain rendering logic.
+// It is a declarative blueprint that Emotiva loads at runtime
+// to construct and animate the character automatically.
+//
+// Example rig file — safe to modify and experiment with.
+// -----------------------------------------------------------------------------
+(
+    layers: [
+        (
+            name: "doll",
+            image: "doll.png",
+
+            offset: Some((0, 0)),
+            z_index: 0,
+
+            motion: Some((
+                // Move vertically into center
+                target: (0.0, -512.0),
+                duration: 1.5,
+                easing_start: Some(SineOut),
+                easing_stop: Some(SineIn),
+            )),
+        ),
+    ],
+)

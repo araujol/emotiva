@@ -1,0 +1,78 @@
+// -----------------------------------------------------------------------------
+// Emotiva Character Rig Definition
+// -----------------------------------------------------------------------------
+//
+// This file defines a character rig used by the Emotiva animation system.
+//
+// A rig describes:
+//   • The sprite layers that compose the character
+//   • Layer hierarchy and parent relationships
+//   • Z-index ordering
+//   • Transform defaults (offset, scale)
+//   • Idle animation parameters (sway, lean, breathing, etc.)
+//   • Eye blink configuration
+//
+// This file does NOT contain rendering logic.
+// It is a declarative blueprint that Emotiva loads at runtime
+// to construct and animate the character automatically.
+//
+// Example rig file — safe to modify and experiment with.
+// -----------------------------------------------------------------------------
+(
+    // Animation values
+    eyes: Some((
+        blink_duration: 0.09,
+        blink_interval_range: (3.5, 6.5),
+    )),
+    // Sprite layers
+    layers: [
+        (
+            name: "body",
+            image: "body.png",
+            offset: Some((0.0, 0.0)),
+            scale: Some(0.8),
+            z_index: 1,
+            tween: Some((
+                sway: (0.0, 1.3),
+                lean: Some((max_angle: 0.07)),
+                period: 3.8,
+                easing_stop: Some(SineInOut),
+            )),
+        ),
+        (
+            name: "hair_behind",
+            image: "hair_behind.png",
+            z_index: 0,
+            parent: Some("body"),
+            tween: Some((
+                sway: (0.5, 0.0),
+                lean: Some((max_angle: 0.08)),
+                period: 3.8,
+                easing_stop: Some(SineInOut),
+            )),
+        ),
+        (
+            name: "eyes_open",
+            image: "eyes_open.png",
+            z_index: 2,
+            parent: Some("body"),
+        ),
+        (
+            name: "eyes_closed",
+            image: "eyes_closed.png",
+            z_index: 2,
+            parent: Some("body"),
+        ),
+        (
+            name: "hair_front",
+            image: "hair_front.png",
+            z_index: 3,
+            parent: Some("body"),
+            tween: Some((
+                sway: (0.7, 0.0),
+                period: 3.8,
+                easing_stop: Some(SineInOut),
+            )),
+        ),
+    ],
+)

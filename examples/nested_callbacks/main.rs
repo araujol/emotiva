@@ -1,28 +1,38 @@
 // ==========================================
-// 🧪 Emotiva Nested Callback Demo (examples/)
+// 🧪 Emotiva Nested Callback + State Demo (examples/)
 // ------------------------------------------
-// This example demonstrates how to use nested animation callbacks
-// in Emotiva to build a chained sequence of facial expressions and
-// sprite effects using Sayuri's rig. The flow uses the `on_end`
-// and `on_delay` APIs to layer animation stages step by step.
+// This example demonstrates how to build a multi-stage animation
+// sequence using Emotiva’s callback system (`on_end`, `on_delay`)
+// combined with a simple external state loop.
+//
+// Rina’s rig is used to showcase how layered sprite effects,
+// facial expressions, scale changes, motion playback, and idle
+// tweens can be chained into a cohesive animation cycle.
 //
 // 🌀 What it shows:
-//  - How to chain animation callbacks
-//  - How to build stateful animation loops with idle delays
-//  - How to separate animation stages into clean helper functions
+//  - How to chain animations using `on_end`
+//  - How to schedule timed transitions using `on_delay`
+//  - How to mix engine-driven callbacks with manual state control
+//  - How to structure animation stages into clean helper functions
+//  - How to start and stop idle facial + layer tweens dynamically
 //
-// 🕒 Animation Flow:
-//  - Waits ~3 seconds at start
-//  - Fades out and changes layers
-//  - Pulses scale and activates motion
-//  - Begins idle facial tweens (eyes, mouth, hair)
-//  - Runs for ~20s, then stops
-//  - Change animation settings at first stop
-//  - And restarts after 3s , repeat loop
+// 🕒 Animation Cycle:
+//  1. Wait ~3 seconds before starting
+//  2. Fade out body layer
+//  3. Change facial layers
+//  4. Fade back in + scale pulse + motion play
+//  5. Reset layers and begin idle tweens (eyes, mouth, hair, body)
+//  6. Run idle loop for ~60 seconds
+//  7. Stop all motion and facial animation
+//  8. Return to idle delay and repeat
+//
+// This example highlights how Emotiva supports
+// declarative motion (rig tweens) and imperative sequencing
+// (runtime callbacks) working together.
 //
 // ▶️ Run this example with:
 // ```bash
-// cargo run --example sayuri
+// cargo run --example nested_callbacks
 // ```
 // ==========================================
 
@@ -35,7 +45,7 @@ use macroquad::prelude::*;
 
 fn window_conf() -> Conf {
     Conf {
-        window_title: "Testing Dojo".to_string(),
+        window_title: "Emotiva - Nested Animation Callbacks".to_string(),
         window_width: 1536,
         window_height: 1024,
         fullscreen: false,
@@ -45,12 +55,17 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    let texture: Texture2D = load_texture("test_data/dojo.png").await.unwrap();
-    let mut emotiva =
-        Emotiva::load_with_textures("test_data/sayuri.emotiva.ron", "test_sprites/sayuri").await;
+    let texture: Texture2D = load_texture("examples/assets/dojo.png").await.unwrap();
+    let mut emotiva = Emotiva::load_with_textures(
+        "examples/nested_callbacks/rina.emotiva.ron",
+        "examples/assets/rina",
+    )
+    .await;
 
     let mut elapsed = 0.0;
     let mut state = 0; // 0: Idle delay, 1: Running, 2: Cooldown
+
+    emotiva.set_screen_position((768.0, 480.0));
 
     loop {
         clear_background(WHITE);
@@ -60,7 +75,7 @@ async fn main() {
         match state {
             0 => {
                 // Wait 3 seconds before first start
-                if elapsed >= 3.0 && !emotiva.is_tween_enabled("base") {
+                if elapsed >= 3.0 && !emotiva.is_tween_enabled("body") {
                     start_intro_sequence(&mut emotiva);
                     state = 1; // switch to running
                     elapsed = 0.0;
@@ -68,7 +83,7 @@ async fn main() {
             }
             1 => {
                 // Running: stop after 20 seconds
-                if elapsed >= 20.0 {
+                if elapsed >= 60.0 {
                     stop_idle_cycle(&mut emotiva);
                     state = 0; // switch to running again
                     elapsed = 0.0;
@@ -85,10 +100,10 @@ async fn main() {
     }
 }
 
-/// Starts a sequence of introductory animations for Sayuri.
+/// Starts a sequence of introductory animations for rina.
 /// This fades her out, changes some facial layers, then fades her back in.
 fn start_intro_sequence(emotiva: &mut Emotiva) {
-    let id = emotiva.set_alpha("base", 1.0, 0.0, 0.5, Easing::SineIn);
+    let id = emotiva.set_alpha("body", 1.0, 0.0, 0.5, Easing::SineIn);
     emotiva.on_end(id, |emo| {
         intro_stage_two(emo);
     });
@@ -100,10 +115,10 @@ fn intro_stage_two(emo: &mut EmotivaHeart) {
     emo.set_layer("eyes_open", "delighted");
     emo.set_layer("mouth_closed", "nothing");
 
-    let id = emo.set_alpha("base", 0.0, 1.0, 0.5, Easing::SineInOut);
+    let id = emo.set_alpha("body", 0.0, 1.0, 0.5, Easing::SineInOut);
     emo.on_end(id, |emo| {
-        let id = emo.set_scale("base", 1.0, 1.2, 0.8, Easing::Linear);
-        emo.motion_play("base");
+        let id = emo.set_scale("body", 1.0, 1.2, 0.8, Easing::Linear);
+        emo.motion_play("body");
         emo.on_end(id, |emo| {
             intro_stage_three(emo);
         });
@@ -113,8 +128,8 @@ fn intro_stage_two(emo: &mut EmotivaHeart) {
 /// Final part of the intro animation.
 /// Shrinks back the scale, reverses motion, delays and resets layers.
 fn intro_stage_three(emo: &mut EmotivaHeart) {
-    let id = emo.set_scale("base", 1.2, 1.0, 0.8, Easing::Linear);
-    emo.motion_reverse("base");
+    let id = emo.set_scale("body", 1.2, 1.0, 0.8, Easing::Linear);
+    emo.motion_reverse("body");
     emo.on_end(id, |emo| {
         emo.on_delay(1.5, |emo| {
             reset_layers_and_start_anim(emo);
@@ -129,20 +144,26 @@ fn reset_layers_and_start_anim(emo: &mut EmotivaHeart) {
     emo.on_delay(0.5, |emo| {
         emo.eyes_start();
         emo.mouth_start();
+        emo.tween_start("name_tag");
+        emo.tween_start("glasses");
         emo.tween_start("mouth_open");
         emo.tween_start("hair_front");
         emo.tween_start("hair_behind");
-        emo.tween_start("base");
+        emo.tween_start("coat");
+        emo.tween_start("body");
     });
 }
 
 /// Stops all idle animation and face motion.
 /// Called after ~20s of the cycle.
 fn stop_idle_cycle(emotiva: &mut Emotiva) {
-    emotiva.tween_stop("base");
+    emotiva.tween_stop("body");
+    emotiva.tween_stop("coat");
     emotiva.tween_stop("hair_behind");
     emotiva.tween_stop("hair_front");
     emotiva.tween_stop("mouth_open");
+    emotiva.tween_stop("glasses");
+    emotiva.tween_stop("name_tag");
     emotiva.mouth_stop();
     emotiva.eyes_stop();
     emotiva.eyes_set_blink_duration(1.0);
