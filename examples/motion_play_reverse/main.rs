@@ -12,7 +12,7 @@
 // 🌀 What it shows:
 //  - How to trigger motion playback with `motion_play`
 //  - How to reverse a motion using `motion_reverse`
-//  - How to detect completion with `is_motion_finished`
+//  - How to detect animation with `is_motion_playing`
 //  - How to gate input while an animation is running
 //  - How to manage simple animation state externally
 //
@@ -57,29 +57,22 @@ async fn main() {
     emotiva.set_screen_position((768.0, 1024.0));
 
     let mut is_centered = false;
-    let mut is_animating = false;
 
     loop {
         let dt = get_frame_time();
         clear_background(GRAY);
 
         // ───── Input ─────
-        if is_key_pressed(KeyCode::Enter) && !is_animating {
-            is_animating = true;
-
+        if is_key_pressed(KeyCode::Enter) && !emotiva.is_motion_playing("doll") {
             if is_centered {
                 // Center → off-screen
                 emotiva.motion_reverse("doll");
+                is_centered = false;
             } else {
                 // Off-screen → center
                 emotiva.motion_play("doll");
+                is_centered = true;
             }
-        }
-
-        // ───── Animation finished? ─────
-        if is_animating && emotiva.is_motion_finished("doll") {
-            is_animating = false;
-            is_centered = !is_centered;
         }
 
         emotiva.update(dt);

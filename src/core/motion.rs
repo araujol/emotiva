@@ -104,8 +104,8 @@ impl Motion2D {
         }
     }
 
-    pub fn is_finished(&self) -> bool {
-        !self.playing
+    pub fn is_playing(&self) -> bool {
+        self.playing
     }
 }
 
@@ -142,7 +142,7 @@ impl Rotation {
         self.motion.value().0
     }
 
-    pub fn is_finished(&self) -> bool {
-        self.motion.is_finished()
+    pub fn is_playing(&self) -> bool {
+        self.motion.is_playing()
     }
 }

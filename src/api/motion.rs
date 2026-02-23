@@ -92,30 +92,30 @@ impl EmotivaHeart {
         None
     }
 
-    /// Checks if the **motion** animation on the given layer has finished.
+    /// Checks if the **motion** animation on the given layer is playing.
     ///
     /// * `layer` - Name of the target layer.
     ///
-    /// Returns `true` if the motion is done or the layer has no motion.
-    pub fn is_motion_finished(&self, layer: &str) -> bool {
+    /// Returns `true` if the motion is playing.
+    pub fn is_motion_playing(&self, layer: &str) -> bool {
         let motion_done = self
             .motions
             .get(layer)
-            .map(|m| m.is_finished())
+            .map(|m| m.is_playing())
             .unwrap_or(true);
         motion_done
     }
 
-    /// Checks if the **rotation** animation on the given layer has finished.
+    /// Checks if the **rotation** animation on the given layer is playing.
     ///
     /// * `layer` - Name of the target layer.
     ///
-    /// Returns `true` if the rotation is done or the layer has no rotation.
-    pub fn is_rotation_finished(&self, layer: &str) -> bool {
+    /// Returns `true` if the rotation is playing.
+    pub fn is_rotation_playing(&self, layer: &str) -> bool {
         let rotation_done = self
             .rotations
             .get(layer)
-            .map(|r| r.is_finished())
+            .map(|r| r.is_playing())
             .unwrap_or(true);
         rotation_done
     }

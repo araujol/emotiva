@@ -241,8 +241,8 @@ impl EmotivaAPI for Emotiva {
         fn eyes_is_blinking_enabled(&self) -> bool;
         fn mouth_is_talking(&self) -> bool;
         fn mouth_is_talking_enabled(&self) -> bool;
-        fn is_motion_finished(&self, layer: &str) -> bool;
-        fn is_rotation_finished(&self, layer: &str) -> bool;
+        fn is_motion_playing(&self, layer: &str) -> bool;
+        fn is_rotation_playing(&self, layer: &str) -> bool;
         fn is_tween_enabled(&self, layer: &str) -> bool;
         fn is_tween_paused(&self, layer: &str) -> bool;
         fn is_scale_finished(&self, layer: &str) -> bool;

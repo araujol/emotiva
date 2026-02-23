@@ -50,8 +50,8 @@ pub trait EmotivaAPI {
     fn motion_reverse(&mut self, layer: &str) -> Option<u64>;
     fn rotation_play(&mut self, layer: &str) -> Option<u64>;
     fn rotation_reverse(&mut self, layer: &str) -> Option<u64>;
-    fn is_motion_finished(&self, layer: &str) -> bool;
-    fn is_rotation_finished(&self, layer: &str) -> bool;
+    fn is_motion_playing(&self, layer: &str) -> bool;
+    fn is_rotation_playing(&self, layer: &str) -> bool;
     // Tween
     fn tween_start(&mut self, layer: &str) -> Option<u64>;
     fn tween_stop(&mut self, layer: &str);
