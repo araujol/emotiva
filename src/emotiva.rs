@@ -8,7 +8,7 @@
 use crate::core::easing::Easing;
 use crate::format::CharRig;
 use crate::snapshot::EmotivaSnapshot;
-use crate::{DrawableSprite, EmotivaHeart};
+use crate::{EmotivaForm, EmotivaHeart};
 use ron::de::from_str as ron_from_str;
 
 // RNG: native uses ThreadRng; wasm uses a seeded ChaCha8 (no OS entropy)
@@ -22,7 +22,7 @@ use std::collections::HashMap;
 /// Core Emotiva animation context.
 ///
 /// This type owns the animation heart and optional texture storage. It can be
-/// updated and queried each frame to obtain resolved `DrawableSprite`s. Rendering
+/// updated and queried each frame to obtain resolved `EmotivaForm`s. Rendering
 /// is performed only when a frontend (such as Macroquad) is enabled.
 pub struct Emotiva {
     pub heart: EmotivaHeart,
@@ -66,9 +66,9 @@ impl Emotiva {
         self.heart.update(dt, &mut self.rng);
     }
 
-    /// Returns the resolved drawable sprites for the current frame.
-    pub fn drawables(&mut self) -> Vec<DrawableSprite> {
-        self.heart.get_drawables()
+    /// Returns the resolved visual forms for the current frame.
+    pub fn forms(&mut self) -> Vec<EmotivaForm> {
+        self.heart.get_forms()
     }
 
     /// Set the position relative to screen coordinates.
@@ -162,7 +162,7 @@ mod macroquad_impl {
 
         /// Draws the current frame using Macroquad.
         pub fn draw(&mut self) {
-            for sprite in self.heart.get_drawables() {
+            for sprite in self.heart.get_forms() {
                 if let Some(tex) = self.textures.get(&sprite.image) {
                     let pivot = vec2(tex.width() / 2.0, tex.height() / 2.0);
                     let pos = vec2(sprite.position.0, sprite.position.1)

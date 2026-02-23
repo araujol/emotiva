@@ -9,7 +9,7 @@
 //! - Loads character rigs from `.ron` files (sprites, layers, variants)
 //! - Holds the state for all animation systems (tweens, motions, rotations, FX)
 //! - Updates these systems each frame to keep characters “alive”
-//! - Outputs `DrawableSprite` structs ready for any rendering backend
+//! - Outputs `EmotivaForm` structs ready for any rendering backend
 //!
 //! ✅ **What EmotivaHeart Doesn’t Do:**
 //! - Doesn’t render directly (frontends like `emotiva-macroquad` handle that)
@@ -48,9 +48,10 @@ use std::collections::HashMap;
 use crate::core::easing::Easing;
 use crate::core::events::AnimEvent;
 
-/// The result of a frame update: a layer with absolute transform info.
+/// A fully resolved visual form produced after a frame update.
+/// Contains absolute transform and visual state.
 #[derive(Debug, Clone)]
-pub struct DrawableSprite {
+pub struct EmotivaForm {
     pub image: String,
     pub position: (f32, f32),
     pub scale: f32,
@@ -64,7 +65,7 @@ pub struct DrawableSprite {
 ///
 /// - Owns the loaded `CharRig` (layer data, variants)
 /// - Tracks all tweens, motions, rotations, and FX
-/// - Produces `DrawableSprite`s for rendering each frame
+/// - Produces `EmotivaForm`s for rendering each frame
 pub struct EmotivaHeart {
     pub rig: CharRig,
     pub time: f32,
@@ -234,8 +235,8 @@ impl EmotivaHeart {
         }
     }
 
-    /// Returns transformed sprites to render this frame.
-    pub fn get_drawables(&mut self) -> Vec<DrawableSprite> {
+    /// Returns the resolved visual forms for the current frame.
+    pub fn get_forms(&mut self) -> Vec<EmotivaForm> {
         let mut output = Vec::new();
         let transforms = resolve_all_transforms(
             &self.rig,
@@ -274,7 +275,7 @@ impl EmotivaHeart {
                 .cloned()
                 .unwrap_or_else(|| layer.image.clone());
 
-            output.push(DrawableSprite {
+            output.push(EmotivaForm {
                 image: final_image,
                 position: (transform.position.0, transform.position.1),
                 scale: transform.scale,
