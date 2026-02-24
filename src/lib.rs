@@ -19,7 +19,7 @@
 //! Because this struct isn’t just a “core” — it’s the *heartbeat* of Emotiva.
 //! It pumps movement, expression, and emotion through the entire system.
 //!
-//! Designed to integrate smoothly with **Rusutori** and other visual novel engines.
+//! Designed to integrate smoothly with visual novel engines.
 //! ==========================================
 
 pub mod anim;
@@ -40,7 +40,7 @@ use core::fx::VisualFxState;
 use core::motion::{Motion2D, Rotation};
 use core::transform::{WorldTransform, resolve_all_transforms};
 use core::tween::TweenState;
-use format::CharRig;
+use format::EmotivaRig;
 
 use rand::Rng;
 use std::collections::HashMap;
@@ -63,11 +63,11 @@ pub struct EmotivaForm {
 
 /// **EmotivaHeart** – the main runtime struct managing all animation state.
 ///
-/// - Owns the loaded `CharRig` (layer data, variants)
+/// - Owns the loaded `EmotivaRig` (layer data, variants)
 /// - Tracks all tweens, motions, rotations, and FX
 /// - Produces `EmotivaForm`s for rendering each frame
 pub struct EmotivaHeart {
-    pub rig: CharRig,
+    pub rig: EmotivaRig,
     pub time: f32,
     pub mouth: Option<MouthState>,
     pub eyes: Option<EyesState>,
@@ -89,7 +89,7 @@ pub struct EmotivaHeart {
 }
 
 impl EmotivaHeart {
-    pub fn new(rig: CharRig) -> Self {
+    pub fn new(rig: EmotivaRig) -> Self {
         let mut tweens = HashMap::new();
         let mut motions = HashMap::new();
         let mut rotations = HashMap::new();

@@ -16,7 +16,7 @@ use std::collections::HashMap;
 use crate::core::fx::VisualFxState;
 use crate::core::motion::{Motion2D, Rotation};
 use crate::core::tween::TweenState;
-use crate::format::CharRig;
+use crate::format::EmotivaRig;
 
 #[derive(Debug, Clone, Copy)]
 pub struct WorldTransform {
@@ -41,7 +41,7 @@ impl Default for WorldTransform {
 
 /// Resolves world transforms for all layers, accounting for parenting and all transformation sources.
 pub fn resolve_all_transforms(
-    rig: &CharRig,
+    rig: &EmotivaRig,
     tweens: &mut HashMap<String, TweenState>,
     motions: &HashMap<String, Motion2D>,
     rotations: &HashMap<String, Rotation>,
@@ -67,7 +67,7 @@ pub fn resolve_all_transforms(
 
 fn resolve_layer_transform(
     name: &str,
-    rig: &CharRig,
+    rig: &EmotivaRig,
     cache: &mut HashMap<String, WorldTransform>,
     tweens: &mut HashMap<String, TweenState>,
     motions: &HashMap<String, Motion2D>,

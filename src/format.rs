@@ -54,7 +54,7 @@ pub struct Tween {
 
 /// A single image layer in a character rig.
 #[derive(Debug, Clone, Deserialize)]
-pub struct CharLayer {
+pub struct Layer {
     /// Logical name for the part (e.g. "eyes", "mouth", "base")
     pub name: String,
 
@@ -110,11 +110,11 @@ pub struct MouthConfig {
     pub flap_time: f32,
 }
 
-/// A full character rig, consisting of multiple layers.
+/// A full character rig (body), consisting of multiple layers.
 #[derive(Debug, Clone, Deserialize)]
-pub struct CharRig {
+pub struct EmotivaRig {
     /// All layers in this character, ordered arbitrarily
-    pub layers: Vec<CharLayer>,
+    pub layers: Vec<Layer>,
 
     /// Optional eye blink animation configuration
     #[serde(default)]

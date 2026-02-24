@@ -6,7 +6,7 @@
 //! and rendering are provided.
 
 use crate::core::easing::Easing;
-use crate::format::CharRig;
+use crate::format::EmotivaRig;
 use crate::snapshot::EmotivaSnapshot;
 use crate::{EmotivaForm, EmotivaHeart};
 use ron::de::from_str as ron_from_str;
@@ -38,7 +38,7 @@ pub struct Emotiva {
 
 impl Emotiva {
     /// Creates an `Emotiva` instance from a pre-parsed rig.
-    pub fn from_rig(rig: CharRig) -> Self {
+    pub fn from_rig(rig: EmotivaRig) -> Self {
         #[cfg(not(target_arch = "wasm32"))]
         let rng = rng();
         #[cfg(target_arch = "wasm32")]
@@ -57,7 +57,7 @@ impl Emotiva {
 
     /// Creates an `Emotiva` instance from a RON string.
     pub fn from_ron_str(ron: &str) -> Self {
-        let rig: CharRig = ron_from_str(ron).expect("Failed to parse Emotiva rig RON");
+        let rig: EmotivaRig = ron_from_str(ron).expect("Failed to parse Emotiva rig RON");
         Self::from_rig(rig)
     }
 
