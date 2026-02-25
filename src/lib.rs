@@ -194,7 +194,7 @@ impl EmotivaHeart {
         }
 
         if let Some(mouth) = &mut self.mouth {
-            let e = mouth.update(self.time, rng);
+            let e = mouth.update(self.time);
             events.push(e);
         }
 

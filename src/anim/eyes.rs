@@ -7,7 +7,7 @@
 //! Used by: `EmotivaHeart` to control which eye sprite is shown each frame.
 
 use crate::AnimEvent;
-use rand::Rng;
+use rand::RngExt;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -46,7 +46,7 @@ impl EyesState {
         self.animation_id = Some(id);
     }
 
-    pub fn update(&mut self, time: f32, rng: &mut impl Rng) -> AnimEvent {
+    pub fn update(&mut self, time: f32, rng: &mut impl RngExt) -> AnimEvent {
         if !self.blinking_enabled {
             return AnimEvent::None;
         }
@@ -99,7 +99,7 @@ impl EyesState {
         self.blink_duration = duration;
     }
 
-    fn safe_gen_range(rng: &mut impl Rng, range: (f32, f32)) -> f32 {
+    fn safe_gen_range(rng: &mut impl RngExt, range: (f32, f32)) -> f32 {
         if (range.0 - range.1).abs() < f32::EPSILON {
             range.0
         } else {

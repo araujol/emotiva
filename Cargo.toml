@@ -15,7 +15,7 @@ include = ["src/**", "Cargo.toml", "README.md", "CHANGELOG.md", "LICENSE"]
 
 [dependencies]
 macroquad = { version = "0.4", optional = true }
-ron = "0.10.1"
+ron = "0.12.0"
 serde = { version = "1.0", features = ["derive"] }
 
 [features]
@@ -23,8 +23,8 @@ default = ["macroquad"]
 macroquad = ["dep:macroquad"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-rand = "0.9.1"
+rand = "0.10.0"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-rand = { version = "0.9", default-features = false }
-rand_chacha = { version = "0.9", default-features = false }
+rand = { version = "0.10", default-features = false }
+rand_chacha = { version = "0.10", default-features = false }

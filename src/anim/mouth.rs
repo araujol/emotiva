@@ -28,7 +28,6 @@
 //! the open time and duration.
 
 use crate::AnimEvent;
-use rand::Rng;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -72,7 +71,7 @@ impl MouthState {
     }
 
     // AnimEvent is returned per talk cycle (every flap begin and end)
-    pub fn update(&mut self, time: f32, _rng: &mut impl Rng) -> AnimEvent {
+    pub fn update(&mut self, time: f32) -> AnimEvent {
         if !self.talking_enabled {
             return AnimEvent::None;
         }
