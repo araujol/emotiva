@@ -11,6 +11,8 @@ readme = "README.md"
 keywords = ["animation", "2d", "sprite", "gamedev", "visual-novel"]
 categories = ["game-development", "graphics"]
 
+include = ["src/**", "Cargo.toml", "README.md", "CHANGELOG.md", "LICENSE"]
+
 [dependencies]
 macroquad = { version = "0.4", optional = true }
 ron = "0.10.1"
