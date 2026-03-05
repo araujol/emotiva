@@ -52,6 +52,7 @@ use crate::core::events::AnimEvent;
 /// Contains absolute transform and visual state.
 #[derive(Debug, Clone)]
 pub struct EmotivaForm {
+    pub name: String,
     pub image: String,
     pub position: (f32, f32),
     pub scale: f32,
@@ -276,6 +277,7 @@ impl EmotivaHeart {
                 .unwrap_or_else(|| layer.image.clone());
 
             output.push(EmotivaForm {
+                name: layer.name.clone(),
                 image: final_image,
                 position: (transform.position.0, transform.position.1),
                 scale: transform.scale,
