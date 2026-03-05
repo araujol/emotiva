@@ -98,12 +98,10 @@ impl EmotivaHeart {
     ///
     /// Returns `true` if the motion is playing.
     pub fn is_motion_playing(&self, layer: &str) -> bool {
-        let motion_done = self
-            .motions
+        self.motions
             .get(layer)
             .map(|m| m.is_playing())
-            .unwrap_or(true);
-        motion_done
+            .unwrap_or(false)
     }
 
     /// Checks if the **rotation** animation on the given layer is playing.
@@ -112,11 +110,9 @@ impl EmotivaHeart {
     ///
     /// Returns `true` if the rotation is playing.
     pub fn is_rotation_playing(&self, layer: &str) -> bool {
-        let rotation_done = self
-            .rotations
+        self.rotations
             .get(layer)
             .map(|r| r.is_playing())
-            .unwrap_or(true);
-        rotation_done
+            .unwrap_or(false)
     }
 }
