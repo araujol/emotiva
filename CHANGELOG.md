@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Placeholder for upcoming changes.
 
+## [0.1.1] - 2026-03-06
+
+### Fixes
+- Fix incorrect return value when checking motion/rotation state.
+
+### Improvements
+- Add layer name field to `EmotivaForm`.
+
+### Documentation
+- Standardize module and example documentation formatting for docs.rs.
+
 ## [0.1.0] - 2026-02-25
 
 ### Added
