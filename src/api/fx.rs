@@ -1,20 +1,39 @@
-// ==========================================
-// 🎭 Emotiva FX API Module
-// ------------------------------------------
-// This module defines the public-facing API
-// functions for managing **visual effects** in Emotiva.
-//
-// ✅ Responsibilities:
-//  - Add or remove scale, alpha (fade), and tint FX
-//  - Clear all FX in one call
-//  - Wrap lower-level FX structs with friendly API methods
-//
-// 📦 Usage:
-// These methods provide an easy way for frontends to
-// trigger visual changes (fades, size changes, color tints)
-// on layers. They allow chaining or timing with tweens/motions
-// for expressive animated effects.
-// ==========================================
+//! # 🎭 FX API
+//!
+//! Public API for controlling **visual effects (FX)** in Emotiva.
+//!
+//! This module extends [`EmotivaHeart`] with helper methods that allow
+//! frontends to apply temporary visual transformations to character
+//! layers.
+//!
+//! These effects are commonly used to create expressive visual changes
+//! such as fades, scale pulses, or color tints that can be combined
+//! with motions and tweens.
+//!
+//! ## Responsibilities
+//!
+//! This module provides APIs to:
+//!
+//! - Apply scale FX to layers
+//! - Apply alpha FX (fades)
+//! - Apply tint FX (color transitions)
+//! - Remove FX from individual layers
+//! - Clear all active FX at once
+//! - Query whether an FX animation has finished
+//!
+//! ## Example
+//!
+//! ```ignore
+//! heart.set_alpha("body", 0.0, 1.0, 0.5, Easing::EaseOut);
+//!
+//! if heart.is_alpha_finished("body") {
+//!     heart.set_tint("body", [1.0,1.0,1.0,1.0], [1.0,0.8,0.8,1.0], 0.3, Easing::EaseIn);
+//! }
+//! ```
+//!
+//! These methods act as a thin **runtime control layer** over Emotiva's
+//! internal FX system, making it easy for frontends to trigger visual
+//! effects without interacting with lower-level effect structures.
 
 use crate::EmotivaHeart;
 use crate::core::easing::Easing;

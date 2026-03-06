@@ -1,21 +1,34 @@
-// ==========================================
-// 🎭 Emotiva Callback API
-// ------------------------------------------
-// Provides core methods for attaching callbacks to animations.
-//
-// ✅ Responsibilities:
-//  - Allow developers to run code when an animation starts or completes
-//  - Serve as the single interface for callback registration in Emotiva
-//  - Keep the API minimal while still supporting chaining via closures
-//
-// 📦 Usage:
-// ```rust
-// let id = emotiva.set_alpha("layer", 0.0, 1.0, 0.5, easing);
-// emotiva.on_end(id, |emo| {
-//     println!("Animation finished!");
-// });
-// ```
-// ==========================================
+//! # 🎭 Callback API
+//!
+//! Public API for attaching **callbacks to animation events** in Emotiva.
+//!
+//! This module extends [`EmotivaHeart`] with helper methods that allow
+//! developers to execute custom logic when an animation starts or finishes.
+//!
+//! Callbacks are associated with animation IDs returned by animation
+//! functions (such as FX, motions, or tweens), allowing frontends to
+//! react to animation lifecycle events.
+//!
+//! ## Responsibilities
+//!
+//! This module provides APIs to:
+//!
+//! - Register callbacks when an animation **starts**
+//! - Register callbacks when an animation **completes**
+//! - Execute user-defined closures when those events occur
+//!
+//! ## Example
+//!
+//! ```ignore
+//! let id = heart.set_alpha("body", 0.0, 1.0, 0.5, Easing::EaseOut);
+//!
+//! heart.on_end(id, |emo| {
+//!     println!("Fade finished!");
+//! });
+//! ```
+//!
+//! Callbacks enable simple animation chaining and event-driven behavior
+//! without requiring frontends to constantly poll animation state.
 
 use crate::EmotivaHeart;
 

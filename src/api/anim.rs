@@ -1,20 +1,52 @@
-// ==========================================
-// 🎭 Emotiva Anim API Module
-// ------------------------------------------
-// This module defines API functions for triggering
-// **character behavior animations** in Emotiva.
-//
-// ✅ Responsibilities:
-//  - Provide a simple API for common animations (blinking, talking)
-//  - Dispatch actions to eyes and mouth animation subsystems
-//
-// 📦 Usage:
-// These methods allow frontends to access the animation API.
-//
-// ✨ Currently implemented:
-//  - Eyes API: blinking animations with duration and interval
-//  - Mouth API: talking animations with configurable flap rhythm
-// ==========================================
+//! # 🎭 Behavior Animation API
+//!
+//! Public API for controlling **character behavior animations** in Emotiva.
+//!
+//! This module extends [`EmotivaHeart`] with helper methods for triggering
+//! high-level character behaviors such as blinking and talking.
+//!
+//! Unlike lower-level animation systems (motions, tweens, FX), these behaviors
+//! represent **natural character actions** that run automatically once enabled.
+//!
+//! ## Responsibilities
+//!
+//! This module provides APIs to:
+//!
+//! - Control eye blinking animations
+//! - Control mouth talking animations
+//! - Configure blink timing and duration
+//! - Configure talk rhythm and flap timing
+//! - Query whether these behaviors are currently active
+//!
+//! ## Example
+//!
+//! ```ignore
+//! heart.eyes_start();
+//!
+//! heart.mouth_start();
+//!
+//! if heart.eyes_is_blinking() {
+//!     // synchronize another animation with a blink
+//! }
+//! ```
+//!
+//! ## Implemented Behavior Systems
+//!
+//! **Eyes API**
+//!
+//! - Automatic blinking with configurable interval range
+//! - Adjustable blink duration
+//! - State queries for synchronization
+//!
+//! **Mouth API**
+//!
+//! - Automatic talking animation loop
+//! - Configurable talk session duration
+//! - Adjustable flap timing for speech rhythm
+//!
+//! These methods provide a simple **behavior layer** on top of Emotiva's
+//! animation systems, allowing frontends to easily trigger lifelike
+//! character actions.
 
 use crate::EmotivaHeart;
 

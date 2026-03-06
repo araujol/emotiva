@@ -1,21 +1,39 @@
-// src/api/mod.rs
-// ==========================================
-// 🎭 Emotiva API Module (mod.rs)
-// ------------------------------------------
-// This is the **main API entry point** for Emotiva.
-//
-// ✅ Responsibilities:
-//  - Organize and re-export all sub-API modules (tween, motion, fx, anim)
-//  - Serve as a single import point for all public-facing Emotiva functions
-//  - Provide a clear structure to keep lib.rs clean and maintainable
-//
-// 📦 Usage:
-// Frontend projects only need to import from this module to access the
-// full Emotiva API surface:
-// ```rust
-// use emotiva::api::*;
-// ```
-// ==========================================
+//! # 🎭 Emotiva API
+//!
+//! Main entry point for the **public Emotiva control API**.
+//!
+//! This module organizes and exposes the high-level runtime controls used
+//! to animate and manipulate characters through [`EmotivaHeart`].
+//!
+//! Each submodule groups related animation systems into focused APIs
+//! (motions, tweens, FX, behaviors, etc.), while the [`EmotivaAPI`] trait
+//! defines the unified interface exposed to frontends.
+//!
+//! ## API Modules
+//!
+//! - [`motion`] — one-shot motion and rotation animations
+//! - [`tween`] — looping tween animations
+//! - [`fx`] — visual effects such as fades, scaling, and tints
+//! - [`layer`] — runtime sprite/variant swapping
+//! - [`anim`] — character behavior animations (blinking, talking)
+//! - [`callback`] — animation lifecycle callbacks
+//!
+//! ## Usage
+//!
+//! Frontends can import the entire API surface through this module:
+//!
+//! ```ignore
+//! use emotiva::api::*;
+//! ```
+//!
+//! This provides access to the [`EmotivaAPI`] trait and all related
+//! animation control methods.
+//!
+//! ## Design Goal
+//!
+//! The API layer keeps Emotiva's runtime **clean and modular** by separating
+//! the public animation interface from the internal animation systems
+//! implemented in the `core` modules.
 
 pub mod anim;
 pub mod callback;

@@ -1,21 +1,37 @@
-// ==========================================
-// 🎭 Emotiva Motion API Module
-// ------------------------------------------
-// This module defines the public-facing API
-// functions for triggering one-shot motions
-// and rotations in Emotiva.
-//
-// ✅ Responsibilities:
-//  - Play and reverse motion animations
-//  - Play and reverse rotation animations
-//  - Query whether motion or rotation has finished
-//
-// 📦 Usage:
-// These API methods are attached to EmotivaHeart,
-// allowing frontends to trigger one-time moves or
-// rotations (e.g. a head tilt or nod) without
-// dealing with lower-level state management.
-// ==========================================
+//! # 🎭 Motion API
+//!
+//! Public API for triggering **one-shot motion and rotation animations**
+//! in Emotiva.
+//!
+//! This module extends [`EmotivaHeart`] with helper methods that allow
+//! frontends to trigger short animation actions without interacting with
+//! the lower-level animation systems directly.
+//!
+//! These animations are typically used for small expressive movements,
+//! such as a head tilt, nod, or brief body motion.
+//!
+//! ## Responsibilities
+//!
+//! This module provides APIs to:
+//!
+//! - Play motion animations
+//! - Reverse motion animations
+//! - Play rotation animations
+//! - Reverse rotation animations
+//! - Query whether a motion or rotation animation is currently playing
+//!
+//! ## Example
+//!
+//! ```ignore
+//! heart.motion_play("head");
+//!
+//! if !heart.is_motion_playing("head") {
+//!     heart.rotation_play("body");
+//! }
+//! ```
+//!
+//! The module acts as a thin **control layer** over Emotiva's internal
+//! motion and rotation animation systems.
 
 use crate::EmotivaHeart;
 

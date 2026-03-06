@@ -1,19 +1,38 @@
-// ==========================================
-// 🎭 Emotiva Layer API Module
-// ------------------------------------------
-// This module provides API functions for swapping
-// and resetting layer images at runtime.
-//
-// ✅ Responsibilities:
-//  - Allow frontends to replace a layer’s image with a
-//    variant defined in the .ron file
-//  - Allow resetting a layer back to its default image
-//
-// 📦 Usage:
-// These methods are attached to EmotivaCore so callers can
-// dynamically swap expressions, outfits, or props for characters
-// during runtime.
-// ==========================================
+//! # 🎭 Layer API
+//!
+//! Public API for **swapping and resetting layer images** at runtime in Emotiva.
+//!
+//! This module extends [`EmotivaHeart`] with helper methods that allow
+//! frontends to dynamically change which sprite image a layer displays.
+//!
+//! Layer swapping is commonly used for things like:
+//!
+//! - facial expressions
+//! - outfit variations
+//! - accessories or props
+//!
+//! These variants are defined in the character rig (`.ron` file) and can
+//! be activated at runtime without modifying the underlying rig structure.
+//!
+//! ## Responsibilities
+//!
+//! This module provides APIs to:
+//!
+//! - Replace a layer’s image with a variant defined in the rig
+//! - Reset a layer back to its default image
+//!
+//! ## Example
+//!
+//! ```ignore
+//! heart.layer_set("eyes", "closed");
+//!
+//! // later
+//! heart.layer_reset("eyes");
+//! ```
+//!
+//! These methods act as a thin **runtime control layer** over the rig’s
+//! predefined sprite variants, allowing characters to change appearance
+//! dynamically during gameplay.
 
 use crate::EmotivaHeart;
 

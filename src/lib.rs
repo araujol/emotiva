@@ -1,26 +1,37 @@
-//! ==========================================
-//! 🎭 **EmotivaHeart** – The Beating Heart of Emotiva
-//! ------------------------------------------
-//! This is the *central runtime* of Emotiva — the part that gives life
-//! to every character rig, drives animations, and produces the drawables
-//! you see on screen.
+//! # 🎭 EmotivaHeart
 //!
-//! ✅ **What EmotivaHeart Does:**
+//! **EmotivaHeart** is the central runtime of **Emotiva**.  
+//! It drives character animation, manages runtime state, and produces
+//! drawable outputs for rendering backends.
+//!
+//! This struct is responsible for giving life to every character rig,
+//! updating animation systems each frame, and generating the forms
+//! that are ultimately rendered on screen.
+//!
+//! ## Responsibilities
+//!
+//! **EmotivaHeart**:
+//!
 //! - Loads character rigs from `.ron` files (sprites, layers, variants)
-//! - Holds the state for all animation systems (tweens, motions, rotations, FX)
-//! - Updates these systems each frame to keep characters “alive”
-//! - Outputs `EmotivaForm` structs ready for any rendering backend
+//! - Holds runtime state for animation systems (tweens, motions, rotations, FX)
+//! - Updates these systems every frame
+//! - Outputs `EmotivaForm` values ready for rendering backends
 //!
-//! ✅ **What EmotivaHeart Doesn’t Do:**
-//! - Doesn’t render directly (frontends like `emotiva-macroquad` handle that)
-//! - Doesn’t expose every helper API itself (see `api/` modules for public API)
+//! ## Non-Responsibilities
 //!
-//! 📦 **Why the name “Heart”?**
-//! Because this struct isn’t just a “core” — it’s the *heartbeat* of Emotiva.
-//! It pumps movement, expression, and emotion through the entire system.
+//! **EmotivaHeart does not**:
 //!
-//! Designed to integrate smoothly with visual novel engines.
-//! ==========================================
+//! - Perform rendering directly (handled by graphics backends)
+//! - Expose all helper APIs itself (see the `api` modules for the public API)
+//!
+//! ## Why “Heart”?
+//!
+//! Because this struct acts as the **runtime engine that keeps characters alive**.
+//! It continuously updates motion, expression, and animation state,
+//! allowing rendering backends to display the current character pose.
+//!
+//! Designed to integrate smoothly with visual novel engines and other
+//! Rust game frameworks.
 
 pub mod anim;
 pub mod api;

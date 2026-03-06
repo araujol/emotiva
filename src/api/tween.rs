@@ -1,20 +1,38 @@
-// ==========================================
-// 🎭 Emotiva Tween API Module
-// ------------------------------------------
-// This module defines the public-facing API
-// functions for controlling tweens in Emotiva.
-//
-// ✅ Responsibilities:
-//  - Start, stop, pause, and resume tweens
-//  - Handle easing-based tween operations
-//  - Query tween state (enabled, paused)
-//
-// 📦 Usage:
-// These functions are methods on EmotivaHeart and
-// provide a clean way for frontends to manipulate
-// character part animations (e.g. breathing, idle)
-// without directly touching internal tween structs.
-// ==========================================
+//! # 🎭 Tween API
+//!
+//! Public API for controlling **tween-based animations** in Emotiva.
+//!
+//! This module extends [`EmotivaHeart`] with helper methods for managing
+//! looping tween animations attached to character layers.
+//!
+//! Tweens are commonly used for subtle continuous movements such as
+//! breathing, idle motion, or gentle sprite offsets that bring a
+//! character to life.
+//!
+//! ## Responsibilities
+//!
+//! This module provides APIs to:
+//!
+//! - Start tween animations
+//! - Stop tween animations
+//! - Pause and resume tweens
+//! - Query tween state (enabled or paused)
+//!
+//! ## Example
+//!
+//! ```ignore
+//! heart.tween_start("body");
+//!
+//! if heart.is_tween_enabled("body") {
+//!     heart.tween_pause("body");
+//! }
+//!
+//! heart.tween_resume("body");
+//! ```
+//!
+//! These methods act as a thin **control layer** over Emotiva's internal
+//! tween system, allowing frontends to trigger continuous character
+//! movements without directly interacting with low-level tween state.
 
 use crate::EmotivaHeart;
 

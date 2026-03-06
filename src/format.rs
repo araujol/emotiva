@@ -1,13 +1,65 @@
-//! Emotiva Format – Rig File Definition & Loader
+//! # 📦 Emotiva Rig Format
 //!
-//! This module defines the serializable data structures (`CharRig`, `CharLayer`)
-//! used in `.emotiva.ron` files,
+//! Serializable data structures used to define **character rigs** in Emotiva.
 //!
-//! Features:
-//! - `CharRig`: Top-level character rig containing ordered layers
-//! - `CharLayer`: Describes an image layer with offset, scale, and z-index
+//! This module describes the schema for `.ron` rig files that specify how a
+//! character is built and animated. These structures are deserialized into an
+//! [`EmotivaRig`] and consumed by the runtime animation engine.
 //!
-//! This is the bridge between static character definitions and the animation engine.
+//! The rig format acts as the bridge between **static character definitions**
+//! and the **runtime animation systems** implemented in the engine.
+//!
+//! ## Core Concepts
+//!
+//! An Emotiva rig is composed of **ordered image layers** that may include
+//! optional animation definitions.
+//!
+//! Each layer can define:
+//!
+//! - A base image
+//! - Position offsets and scale
+//! - Drawing order (`z_index`)
+//! - Optional tween animations
+//! - Optional motion animations
+//! - Optional image variants for runtime swapping
+//!
+//! Additional configuration blocks may define **character behaviors** such as
+//! blinking or talking.
+//!
+//! ## Main Structures
+//!
+//! - [`EmotivaRig`] — top-level character rig definition
+//! - [`Layer`] — individual sprite layer definition
+//! - [`Tween`] — looping sway/lean animation definition
+//! - [`MotionDef`] — one-shot motion animation
+//! - [`EyesConfig`] — blinking behavior configuration
+//! - [`MouthConfig`] — talking behavior configuration
+//!
+//! ## Example
+//!
+//! ```ignore
+//! EmotivaRig(
+//!     layers: [
+//!         (
+//!             name: "base",
+//!             image: "body.png",
+//!             z_index: 0,
+//!         ),
+//!         (
+//!             name: "eyes",
+//!             image: "eyes_open.png",
+//!             z_index: 10,
+//!         ),
+//!     ],
+//!     eyes: Some((
+//!         blink_interval_range: (2.0, 5.0),
+//!         blink_duration: 0.12,
+//!     )),
+//! )
+//! ```
+//!
+//! These structures are typically loaded from `.ron` files and passed to
+//! the runtime using [`crate::Emotiva::from_rig`] or [`crate::Emotiva::from_ron_str`].
 
 use crate::core::easing::Easing;
 use serde::Deserialize;

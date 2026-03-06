@@ -1,9 +1,67 @@
-//! Emotiva Runtime
+//! # 🎭 Emotiva Runtime
 //!
-//! This module defines Emotiva's core animation API. It is renderer-agnostic and
-//! can be used with or without a graphical frontend. When compiled with the
-//! `macroquad` feature enabled, additional helper methods for texture loading
-//! and rendering are provided.
+//! High-level runtime context for **Emotiva character animation**.
+//!
+//! The [`Emotiva`] struct acts as the main runtime container used by
+//! frontend applications. It owns an [`EmotivaHeart`] instance and
+//! coordinates animation updates, state management, and optional
+//! rendering integrations.
+//!
+//! The runtime itself is **renderer-agnostic**, meaning it can operate
+//! without any graphics backend. When the `macroquad` feature is enabled,
+//! additional helper functions are provided for loading textures and
+//! rendering characters directly.
+//!
+//! ## Responsibilities
+//!
+//! The runtime is responsible for:
+//!
+//! - Owning and updating the internal [`EmotivaHeart`] animation engine
+//! - Advancing animation state each frame
+//! - Producing resolved [`EmotivaForm`] values for rendering
+//! - Managing optional frontend integrations (e.g. Macroquad)
+//! - Providing save/load snapshot helpers
+//! - Forwarding the public animation API through [`crate::api::EmotivaAPI`]
+//!
+//! ## Basic Usage
+//!
+//! ```ignore
+//! let mut emo = Emotiva::from_ron_str(rig_data);
+//!
+//! loop {
+//!     emo.update(dt);
+//!
+//!     for form in emo.forms() {
+//!         // render sprite using your engine
+//!     }
+//! }
+//! ```
+//!
+//! ## Rendering Backends
+//!
+//! Emotiva does not require a renderer. Applications are free to draw the
+//! returned [`EmotivaForm`] values using any graphics system.
+//!
+//! When the `macroquad` feature is enabled, helper utilities are provided
+//! to load textures and render characters directly using Macroquad.
+//!
+//! ## Architecture
+//!
+//! ```text
+//! Rig (.ron)
+//!      │
+//!      ▼
+//!  EmotivaRuntime
+//!      │
+//!      ▼
+//!  EmotivaHeart
+//!      │
+//!      ▼
+//!  EmotivaForm list
+//!      │
+//!      ▼
+//! Rendering backend (Macroquad, Bevy, custom engine)
+//! ```
 
 use crate::core::easing::Easing;
 use crate::format::EmotivaRig;
