@@ -1,36 +1,36 @@
-// ==========================================
-// 🎛 Emotiva Tween Lifecycle Control Demo (examples/)
-// ------------------------------------------
-// This example demonstrates how to control a layer tween at runtime,
-// including starting, pausing, resuming, and stopping animations.
-//
-// A rig with a predefined tween ("doll") is loaded, and the example
-// automatically cycles through different tween states over time.
-// The goal is to showcase how Emotiva allows fine-grained control
-// over continuous layer animations without restarting the engine
-// or rebuilding the rig.
-//
-// 🌀 What it shows:
-//  - How to start a tween with `tween_start`
-//  - How to pause and resume a tween
-//  - How to fully stop a tween
-//  - How to query tween state (`is_tween_paused`)
-//  - How to coordinate tween control using simple runtime logic
-//
-// 🕒 Runtime Behavior:
-//  - Every ~5 seconds the tween state changes
-//  - The cycle alternates between running and paused states
-//  - After several pauses, the tween is fully stopped
-//  - The sequence then repeats
-//
-// This example highlights how Emotiva supports dynamic animation
-// control during gameplay or interactive scenes.
-//
-// ▶️ Run this example with:
-// ```bash
-// cargo run --example tween_lifecycle
-// ```
-// ==========================================
+//! # Emotiva Tween Lifecycle Example
+//!
+//! Demonstrates how to control the **lifecycle of a tween animation**
+//! at runtime, including starting, pausing, resuming, and stopping
+//! continuous layer motion.
+//!
+//! The example loads a rig containing a predefined tween (`doll`) and
+//! automatically cycles through different tween states over time.
+//!
+//! ## What This Example Shows
+//!
+//! - Starting a tween with `tween_start`
+//! - Pausing and resuming a tween
+//! - Stopping a tween completely
+//! - Querying tween state using `is_tween_paused`
+//! - Coordinating animation control through simple runtime logic
+//!
+//! ## Runtime Behavior
+//!
+//! Every ~5 seconds the tween state changes:
+//!
+//! - The animation alternates between **running** and **paused**
+//! - After several pauses the tween is **fully stopped**
+//! - The sequence then repeats
+//!
+//! This demonstrates how Emotiva supports **dynamic animation control**
+//! during gameplay or interactive scenes.
+//!
+//! ## Run
+//!
+//! ```bash
+//! cargo run --example tween_lifecycle
+//! ```
 use emotiva::Emotiva;
 use emotiva::api::EmotivaAPI;
 

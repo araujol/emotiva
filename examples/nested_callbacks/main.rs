@@ -1,41 +1,43 @@
-// ==========================================
-// 🧪 Emotiva Nested Callback + State Demo (examples/)
-// ------------------------------------------
-// This example demonstrates how to build a multi-stage animation
-// sequence using Emotiva’s callback system (`on_end`, `on_delay`)
-// combined with a simple external state loop.
-//
-// Rina’s rig is used to showcase how layered sprite effects,
-// facial expressions, scale changes, motion playback, and idle
-// tweens can be chained into a cohesive animation cycle.
-//
-// 🌀 What it shows:
-//  - How to chain animations using `on_end`
-//  - How to schedule timed transitions using `on_delay`
-//  - How to mix engine-driven callbacks with manual state control
-//  - How to structure animation stages into clean helper functions
-//  - How to start and stop idle facial + layer tweens dynamically
-//
-// 🕒 Animation Cycle:
-//  1. Wait ~3 seconds before starting
-//  2. Fade out body layer
-//  3. Change facial layers
-//  4. Fade back in + scale pulse + motion play
-//  5. Reset layers and begin idle tweens (eyes, mouth, hair, body)
-//  6. Run idle loop for ~60 seconds
-//  7. Stop all motion and facial animation
-//  8. Return to idle delay and repeat
-//
-// This example highlights how Emotiva supports
-// declarative motion (rig tweens) and imperative sequencing
-// (runtime callbacks) working together.
-//
-// ▶️ Run this example with:
-// ```bash
-// cargo run --example nested_callbacks
-// ```
-// ==========================================
-
+//! # Emotiva Nested Callback Example
+//!
+//! Demonstrates how to build a **multi-stage animation sequence**
+//! using Emotiva's callback system (`on_end`, `on_delay`) together
+//! with a simple external state loop.
+//!
+//! The example loads Rina’s rig and chains several animations to form
+//! a small character performance, combining visual effects, motion,
+//! facial changes, and idle tweens.
+//!
+//! ## What This Example Shows
+//!
+//! - Chaining animations using `on_end`
+//! - Scheduling delayed actions using `on_delay`
+//! - Mixing runtime callbacks with external state logic
+//! - Structuring animation stages into helper functions
+//! - Dynamically starting and stopping idle animations
+//!
+//! ## Animation Sequence
+//!
+//! The demo performs the following cycle:
+//!
+//! 1. Wait ~3 seconds before starting
+//! 2. Fade out the body layer
+//! 3. Change facial layers
+//! 4. Fade back in, apply scale pulse, and play motion
+//! 5. Reset layers and begin idle animations (eyes, mouth, hair, body)
+//! 6. Run idle loop for ~60 seconds
+//! 7. Stop all animation
+//! 8. Return to the idle delay and repeat
+//!
+//! This example highlights how Emotiva supports combining
+//! **declarative rig animations** (tweens and motions) with
+//! **imperative runtime sequencing** through callbacks.
+//!
+//! ## Run
+//!
+//! ```bash
+//! cargo run --example nested_callbacks
+//! ```
 use emotiva::Emotiva;
 use emotiva::EmotivaHeart;
 use emotiva::api::Easing;

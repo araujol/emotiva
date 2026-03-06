@@ -1,31 +1,34 @@
-// ==========================================
-// 🎭 Emotiva Character Basic Tweening Demo (examples/)
-// ------------------------------------------
-// This example demonstrates how to initialize and run a basic
-// character rig using Emotiva with idle tween animations.
-//
-// The demo loads Kaori’s rig definition, applies automatic
-// blinking and layered motion tweens (body sway, hair movement),
-// and renders the character over a static background using
-// Macroquad.
-//
-// 🌀 What it shows:
-//  - How to load a `.emotiva.ron` rig file
-//  - How to provide a texture directory for sprite layers
-//  - How to position a character on screen
-//  - How to start tweens programmatically
-//  - How to update and draw Emotiva each frame
-//
-// 🕒 Runtime Behavior:
-//  - On first frame, blinking and body/hair tweens are started
-//  - The character animates continuously using idle motion
-//  - Background is rendered first, then the animated character
-//
-// ▶️ Run this example with:
-// ```bash
-// cargo run --example kaori
-// ```
-// ==========================================
+//! # Emotiva Basic Tweening Example
+//!
+//! Demonstrates how to load and animate a character rig using **Emotiva**
+//! with idle tween animations and blinking behavior.
+//!
+//! The example loads Kaori's rig, starts blinking and several layer tweens,
+//! and renders the animated character over a static background using
+//! the Macroquad backend.
+//!
+//! ## What This Example Shows
+//!
+//! - Loading a `.emotiva.ron` rig file
+//! - Providing a texture directory for sprite layers
+//! - Positioning a character on screen
+//! - Starting tween animations programmatically
+//! - Updating and rendering Emotiva each frame
+//!
+//! ## Runtime Behavior
+//!
+//! On the first frame the example:
+//!
+//! - Enables automatic eye blinking
+//! - Starts idle tweens for body and hair layers
+//!
+//! The character then animates continuously using these motions.
+//!
+//! ## Run
+//!
+//! ```bash
+//! cargo run --example basic_tween
+//! ```
 use emotiva::Emotiva;
 use emotiva::api::EmotivaAPI;
 

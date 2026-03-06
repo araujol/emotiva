@@ -1,34 +1,31 @@
-// ==========================================
-// 🎭 Emotiva Motion Play / Reverse Demo (examples/)
-// ------------------------------------------
-// This example demonstrates how to use Emotiva’s motion system
-// to play and reverse a predefined movement animation at runtime.
-//
-// A character rig with a vertical motion track ("doll") is loaded,
-// and the motion is toggled using keyboard input. The example shows
-// how to control motion playback, detect when it finishes, and
-// coordinate simple state transitions.
-//
-// 🌀 What it shows:
-//  - How to trigger motion playback with `motion_play`
-//  - How to reverse a motion using `motion_reverse`
-//  - How to detect animation with `is_motion_playing`
-//  - How to gate input while an animation is running
-//  - How to manage simple animation state externally
-//
-// 🎮 Interaction:
-//  - Press ENTER to toggle the character:
-//      • Off-screen → center (play motion)
-//      • Center → off-screen (reverse motion)
-//
-// This example highlights how Emotiva’s motion tracks can be
-// controlled imperatively and integrated with real-time input.
-//
-// ▶️ Run this example with:
-// ```bash
-// cargo run --example motion_play_reverse
-// ```
-// ==========================================
+//! # Emotiva Motion Play / Reverse Example
+//!
+//! Demonstrates how to control **motion animations** in Emotiva by
+//! playing and reversing a predefined motion track at runtime.
+//!
+//! The example loads a character rig with a vertical motion track
+//! (`doll`) and toggles the animation using keyboard input.
+//!
+//! ## What This Example Shows
+//!
+//! - Triggering a motion using `motion_play`
+//! - Reversing a motion using `motion_reverse`
+//! - Checking animation state with `is_motion_playing`
+//! - Preventing input while an animation is running
+//! - Managing simple animation state externally
+//!
+//! ## Interaction
+//!
+//! Press **ENTER** to toggle the character motion:
+//!
+//! - Off-screen → center (`motion_play`)
+//! - Center → off-screen (`motion_reverse`)
+//!
+//! ## Run
+//!
+//! ```bash
+//! cargo run --example motion_play_reverse
+//! ```
 use emotiva::Emotiva;
 use emotiva::api::EmotivaAPI;
 
