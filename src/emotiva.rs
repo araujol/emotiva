@@ -125,7 +125,7 @@ impl Emotiva {
     }
 
     /// Returns the resolved visual forms for the current frame.
-    pub fn forms(&mut self) -> Vec<EmotivaForm> {
+    pub fn forms(&self) -> Vec<EmotivaForm> {
         self.heart.get_forms()
     }
 

@@ -248,11 +248,11 @@ impl EmotivaHeart {
     }
 
     /// Returns the resolved visual forms for the current frame.
-    pub fn get_forms(&mut self) -> Vec<EmotivaForm> {
+    pub fn get_forms(&self) -> Vec<EmotivaForm> {
         let mut output = Vec::new();
         let transforms = resolve_all_transforms(
             &self.rig,
-            &mut self.tweens,
+            &self.tweens,
             &self.motions,
             &self.rotations,
             &self.visual_fx,
